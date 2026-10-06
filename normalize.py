@@ -1,0 +1,69 @@
+from __future__ import annotations
+
+import re
+import unicodedata
+
+NA_VALUES = {"", "NA", "N/A", "NOT AVAILABLE", "NONE", "NULL", "UNRESOLVED"}
+
+
+def normalize_text(value: object) -> str:
+    return re.sub(r"\s+", " ", str(value or "").replace("\xa0", " ")).strip()
+
+
+def normalize_units(value: object) -> str:
+    text = normalize_text(value)
+    text = re.sub(r"(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)\s*(CL|ML|KG|MM|G|OZ)\b", lambda match: f"{match.group(1)}x{match.group(2)}{match.group(3).upper()}", text, flags=re.IGNORECASE)
+    text = re.sub(r"(\d+(?:\.\d+)?)\s*(CL)\b", r"\1CL", text, flags=re.IGNORECASE)
+    text = re.sub(r"(\d+(?:\.\d+)?)\s*(ML|KG|MM|G|OZ)\b", lambda match: f"{match.group(1)} {match.group(2).lower()}", text, flags=re.IGNORECASE)
+    text = re.sub(r"(\d+(?:\.\d+)?)\s*%", r"\1%", text)
+    return normalize_text(text)
+
+
+def normalize_item_type(value: object) -> str:
+    text = normalize_text(value)
+    values = {"saleable": "Saleable", "non-saleable": "Non-Saleable"}
+    return values.get(text.casefold(), text)
+
+
+def normalize_product_type(value: object) -> str:
+    return normalize_text(value)
+
+
+def normalize_title(value: object) -> str:
+    return normalize_units(value)
+
+
+def ascii_text(value: object) -> str:
+    text = unicodedata.normalize("NFKD", str(value or ""))
+    return text.encode("ascii", "ignore").decode("ascii")
+
+
+def normalize_invoice(value: object, limit: int = 33) -> str:
+    text = ascii_text(normalize_units(value)).upper()
+    text = re.sub(r"[^A-Z0-9& ]", " ", text)
+    text = normalize_text(text)
+    return text[:limit].rstrip()
+
+
+def normalize_attribute(name: str, value: object) -> str:
+    text = normalize_text(value)
+    if text.upper() in NA_VALUES:
+        return "NA"
+    text = normalize_units(text)
+    if "%" in name and re.fullmatch(r"\d+(?:\.\d+)?", text):
+        return f"{text}%"
+    if name.casefold().endswith("_cl") and re.fullmatch(r"\d+(?:\.\d+)?", text):
+        return f"{text}CL"
+    if name.casefold().endswith("_ml") and re.fullmatch(r"\d+(?:\.\d+)?", text):
+        return f"{text} ml"
+    if name.casefold().endswith("_g") and re.fullmatch(r"\d+(?:\.\d+)?", text):
+        return f"{text} g"
+    if name.casefold().endswith("_kg") and re.fullmatch(r"\d+(?:\.\d+)?", text):
+        return f"{text} kg"
+    if name.casefold().endswith("_mm") and re.fullmatch(r"\d+(?:\.\d+)?", text):
+        return f"{text} mm"
+    return text
+
+
+def changed(before: object, after: object) -> bool:
+    return str(before or "") != str(after or "")

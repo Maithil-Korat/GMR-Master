@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GMR Master Catalog Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-app: #f8fafc;
+  --panel: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-subtle: #94a3b8;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --navy: #0f172a;
+  --navy-hover: #1e293b;
+  --accent-gold: #f59e0b;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-subtle: #eff6ff;
+  
+  --clean: #10b981;
+  --clean-bg: #ecfdf5;
+  --clean-border: #a7f3d0;
+  
+  --review: #d97706;
+  --review-bg: #fffbeb;
+  --review-border: #fde68a;
+  
+  --blocked: #ef4444;
+  --blocked-bg: #fef2f2;
+  --blocked-border: #fecaca;
+  
+  --reused: #7c3aed;
+  --reused-bg: #f5f3ff;
+  --reused-border: #ddd6fe;
+
+  --focus: #3b82f6;
+  --row-hover: #f8fafc;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg-app);
+  color: var(--text-main);
+  font: 13.5px/1.5 "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 { margin: 0; color: var(--text-main); font-weight: 700; letter-spacing: -0.02em; }
+.mono { font-family: "IBM Plex Mono", monospace; font-weight: 500; }
+.mute { color: var(--text-muted); }
+
+header.navbar {
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.brand { display: flex; align-items: center; gap: 12px; }
+.mark {
+  background: var(--navy);
+  color: #fff;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.08em;
+}
+.brand h1 { font-size: 15px; }
+.brand small { color: var(--text-muted); font-size: 11.5px; }
+
+.actions { display: flex; gap: 8px; align-items: center; }
+.btn {
+  font: inherit;
+  font-weight: 600;
+  font-size: 12.5px;
+  padding: 7px 13px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--panel);
+  color: var(--text-main);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+.btn:hover:not(:disabled) { background: #f1f5f9; border-color: var(--text-subtle); }
+.btn.pri { background: var(--navy); color: #fff; border-color: var(--navy); }
+.btn.pri:hover:not(:disabled) { background: var(--navy-hover); }
+.btn.gold { background: var(--accent-gold); color: #fff; border-color: var(--accent-gold); font-weight: 700; }
+.btn.gold:hover:not(:disabled) { background: #d97706; }
+.btn.sm { padding: 4px 9px; font-size: 11.5px; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.link {
+  background: none; border: 0; color: var(--reused); text-decoration: underline;
+  cursor: pointer; font: inherit; font-size: 11px; font-weight: 600; margin-left: 6px;
+}
+
+main.wrap { max-width: 1780px; margin: 0 auto; padding: 20px 28px 48px; display: flex; flex-direction: column; gap: 16px; }
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+
+.steps { display: flex; gap: 8px; padding: 10px; overflow-x: auto; }
+.step {
+  flex: 1; min-width: 130px; text-align: left; font: inherit; padding: 8px 12px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--panel);
+  color: var(--text-main); cursor: pointer; transition: all 0.15s;
+}
+.step small { display: block; font-size: 10px; font-weight: 700; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.05em; }
+.step b { font-size: 12px; font-weight: 600; }
+.step:hover:not(:disabled) { background: var(--primary-subtle); border-color: var(--primary); }
+.step.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+.step.on small { color: rgba(255,255,255,0.8); }
+
+.live { padding: 10px 16px; display: flex; gap: 14px; align-items: center; font-size: 12.5px; font-weight: 600; }
+.live.err { background: var(--blocked-bg); color: var(--blocked); border-color: var(--blocked-border); }
+.bar { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--accent-gold); transition: width 0.4s; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.card {
+  font: inherit; text-align: left; padding: 12px 16px; border-radius: var(--radius-md);
+  border: 1px solid var(--border); background: var(--panel); color: var(--text-main); cursor: pointer; transition: all 0.15s;
+}
+.card:hover { border-color: var(--text-subtle); }
+.card b { display: block; font-size: 24px; font-weight: 700; line-height: 1.1; margin-bottom: 2px; }
+.card small { font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+
+.card.g { background: var(--clean-bg); color: var(--clean); border-color: var(--clean-border); }
+.card.a { background: var(--review-bg); color: var(--review); border-color: var(--review-border); }
+.card.r { background: var(--blocked-bg); color: var(--blocked); border-color: var(--blocked-border); }
+.card.v { background: var(--reused-bg); color: var(--reused); border-color: var(--reused-border); }
+.card.on { box-shadow: 0 0 0 2px currentColor; }
+
+.chips { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 12px; }
+.chip {
+  font: inherit; font-size: 11.5px; font-weight: 600; padding: 4px 12px; border-radius: 999px;
+  border: 1px solid var(--border-strong); background: var(--panel); color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+}
+.chip:hover { border-color: var(--text-main); color: var(--text-main); }
+.chip.on { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+.bulk {
+  background: #1e293b; color: #fff; padding: 10px 16px; border-radius: var(--radius-md);
+  display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 12.5px;
+}
+.bulk input, .bulk select {
+  font: inherit; font-size: 12px; padding: 6px 10px; border-radius: var(--radius-sm);
+  border: 1px solid #334155; background: #0f172a; color: #fff;
+}
+.bulk input { flex: 1; min-width: 240px; }
+
+.toolbar {
+  padding: 10px 16px; display: flex; gap: 12px; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; border-bottom: 1px solid var(--border);
+}
+input[type=search], .field input, .field select, .field textarea {
+  font: inherit; font-size: 12.5px; padding: 7px 10px; border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm); background: var(--panel); color: var(--text-main); width: 100%;
+}
+input[type=search] { max-width: 380px; }
+input[type=search]:focus, .field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--primary); outline: none; box-shadow: 0 0 0 2px var(--primary-subtle);
+}
+kbd { font: 11px "IBM Plex Mono", monospace; border: 1px solid var(--border-strong); border-bottom-width: 2px; border-radius: 4px; padding: 1px 5px; background: #f1f5f9; color: var(--text-muted); }
+
+.tablebox { overflow: auto; max-height: 62vh; }
+.tablebox.busy { opacity: 0.55; }
+table { width: 100%; border-collapse: collapse; text-align: left; }
+th {
+  position: sticky; top: 0; background: #f8fafc; font-weight: 700; font-size: 11px;
+  color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;
+  padding: 8px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; z-index: 2;
+}
+td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 12.5px; }
+tr:hover td { background: var(--row-hover); }
+tr.sel td { background: #f1f5f9; }
+tr.focus td:first-child { box-shadow: inset 3px 0 0 var(--primary); }
+
+td.title { min-width: 300px; font-weight: 600; color: var(--text-main); }
+.sub { font-weight: 400; font-size: 11px; color: var(--text-subtle); max-width: 480px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.note { font-size: 11px; color: var(--review); font-weight: 500; margin-top: 2px; }
+.tax { font-family: "IBM Plex Mono", monospace; font-size: 11px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-muted); }
+
+.badge { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.badge:before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.badge.g { background: var(--clean-bg); color: var(--clean); }
+.badge.a { background: var(--review-bg); color: var(--review); }
+.badge.r { background: var(--blocked-bg); color: var(--blocked); }
+.badge.v { background: var(--reused-bg); color: var(--reused); }
+.badge.mute { background: #f1f5f9; color: var(--text-muted); }
+
+.pager { padding: 10px 16px; display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; border-top: 1px solid var(--border); font-size: 12px; }
+.pager select { font: inherit; padding: 4px 8px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--panel); color: var(--text-main); }
+
+.scrim { position: fixed; inset: 0; background: rgba(15,23,42,0.45); backdrop-filter: blur(2px); z-index: 50; display: flex; justify-content: flex-end; }
+.scrim.mid { justify-content: center; align-items: center; padding: 16px; }
+.drawer { width: min(620px, 100%); height: 100%; background: var(--panel); padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; box-shadow: -4px 0 24px rgba(0,0,0,0.08); }
+.modal { width: min(560px, 100%); background: var(--panel); border-radius: var(--radius-lg); padding: 24px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 12px 32px rgba(0,0,0,0.12); }
+.section-box { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; display: flex; flex-direction: column; gap: 10px; background: #fafafa; }
+.field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600; color: var(--text-main); }
+.ctx { background: #f8fafc; border: 1px solid var(--border); padding: 10px; border-radius: var(--radius-sm); font: 11.5px "IBM Plex Mono", monospace; color: var(--text-muted); word-break: break-word; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.foot { display: flex; justify-content: flex-end; gap: 10px; margin-top: auto; padding-top: 12px; }
+
+.toasts { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 60; width: min(480px, 92vw); }
+.toast { padding: 10px 14px; border-radius: var(--radius-sm); background: var(--navy); color: #fff; font-size: 12.5px; font-weight: 500; box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+.toast.err { background: var(--blocked); }
+
+.up { max-width: 520px; margin: 16vh auto 0; text-align: center; }
+.drop { margin-top: 20px; border: 2px dashed var(--border-strong); border-radius: var(--radius-lg); padding: 48px 24px; background: var(--panel); transition: all 0.15s; }
+.drop.drag { border-color: var(--primary); background: var(--primary-subtle); }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script type="module">
+import { html, render, useState, useEffect, useRef, useCallback } from "https://unpkg.com/htm@3.1.1/preact/standalone.module.js";
+
+const BASE = location.protocol === "file:" ? "http://localhost:8000" : "";
+const S = String;
+const STAGES = [
+  ["FIELD_MAP", "Field Map"],
+  ["ITEM_TYPE", "Item Type"],
+  ["PRODUCT_TYPE", "Product Type"],
+  ["TITLE", "Cleaned Titles"],
+  ["ATTRIBUTES", "Attributes"],
+  ["CONTENT", "Commercial Copy"],
+  ["TAXONOMY", "Taxonomy"],
+  ["UNICODE", "Item Numbers"]
+];
+
+const BADGE = {
+  CLEAN: ["g", "Clean"],
+  REVIEW: ["a", "Review"],
+  BLOCKED: ["r", "Blocked"],
+  DUPLICATE: ["v", "Reused #"],
+  PENDING: ["mute", "Pending"]
+};
+
+const CLUSTERS = {
+  unmapped_base_code: "Unmapped Base Code",
+  parser_conflict: "Tester vs Saleable Conflict",
+  ungrounded_content: "Ungrounded Claims"
+};
+
+async function api(path, opts = {}) {
+  const { json, ...init } = opts;
+  if (json !== undefined) {
+    init.method = init.method || "POST";
+    init.headers = { "Content-Type": "application/json" };
+    init.body = JSON.stringify(json);
+  }
+  let res;
+  try { res = await fetch(BASE + path, init); }
+  catch (e) {
+    if (e.name === "AbortError") throw e;
+    throw new Error("Cannot connect to backend. Ensure FastAPI is running on port 8000.");
+  }
+  if (!res.ok) {
+    let msg = `Server returned error ${res.status}`;
+    try {
+      const d = (await res.json()).detail;
+      msg = typeof d === "string" ? d : Array.isArray(d) ? d.map(x => x.msg).join("; ") : msg;
+    } catch {}
+    const err = new Error(msg);
+    err.status = res.status;
+    throw err;
+  }
+  return res;
+}
+const getJSON = async (p, o) => (await api(p, o)).json();
+
+function App() {
+  const [file, setFile] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("gmr_file")); }
+    catch { return null; }
+  });
+  const [columnModalFile, setColumnModalFile] = useState(null);
+
+  const set = f => {
+    setFile(f);
+    try {
+      f ? localStorage.setItem("gmr_file", JSON.stringify(f)) : localStorage.removeItem("gmr_file");
+    } catch {}
+  };
+
+  return html`
+    ${file ? html`<${Workspace} key=${file.file_id} file=${file} onExit=${() => set(null)} onOpenColumns=${() => setColumnModalFile(file)} />` : html`<${Upload} onDone=${f => { set(f); setColumnModalFile(f); }} />`}
+    ${columnModalFile && html`<${ColumnSetupModal} file=${columnModalFile} onClose=${() => setColumnModalFile(null)} />`}
+  `;
+}
+
+function Upload({ onDone }) {
+  const [tab, setTab] = useState("file"); // "file" | "paste"
+  const [drag, setDrag] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const [pastedText, setPastedText] = useState("");
+  const inp = useRef();
+
+  const sendFile = async f => {
+    if (!f) return;
+    if (!/\.(xlsx|xls|xlsb)$/i.test(f.name)) return setErr("Select an Excel file (.xlsx, .xls, .xlsb).");
+    setErr(""); setBusy(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", f);
+      const d = await getJSON("/api/files/upload", { method: "POST", body: fd });
+      onDone({ file_id: d.file_id, file_name: d.file_name, total_rows: d.total_rows });
+    } catch (e) { setErr(e.message); }
+    finally { setBusy(false); }
+  };
+
+  const sendText = async () => {
+    if (!pastedText.trim()) return setErr("Please paste some catalog text first.");
+    setErr(""); setBusy(true);
+    try {
+      const d = await getJSON("/api/files/paste", {
+        json: { raw_text: pastedText, file_name: "Pasted_Catalog.xlsx" }
+      });
+      onDone({ file_id: d.file_id, file_name: d.file_name, total_rows: d.total_rows });
+    } catch (e) { setErr(e.message); }
+    finally { setBusy(false); }
+  };
+
+  return html`<div class="up">
+    <h2>Catalog Master Engine</h2>
+    <p class="mute" style="font-size:13px; margin-top:4px;">Upload an Excel workbook or paste unformatted catalog text directly.</p>
+    
+    <!-- Tab Switcher -->
+    <div style="display:flex; justify-content:center; gap:8px; margin-top:16px;">
+      <button class=${"btn sm " + (tab === "file" ? "pri" : "")} onClick=${() => setTab("file")}>📁 Upload Excel File</button>
+      <button class=${"btn sm " + (tab === "paste" ? "pri" : "")} onClick=${() => setTab("paste")}>📋 Paste Raw Text / Table</button>
+    </div>
+
+    ${tab === "file" ? html`
+      <div class=${"drop" + (drag ? " drag" : "")} onDragOver=${e => { e.preventDefault(); setDrag(true); }} onDragLeave=${() => setDrag(false)} onDrop=${e => { e.preventDefault(); setDrag(false); sendFile(e.dataTransfer.files[0]); }}>
+        ${busy ? html`<p class="mute">Reading workbook records...</p>` : html`
+          <p style="font-weight:600; margin-bottom:12px;">Drag and drop catalog file here</p>
+          <button class="btn pri" onClick=${() => inp.current.click()}>Choose File</button>
+        `}
+        <input ref=${inp} type="file" hidden accept=".xlsx,.xls,.xlsb" onChange=${e => sendFile(e.target.files[0])} />
+      </div>
+    ` : html`
+      <div style="margin-top:20px; text-align:left;">
+        <textarea
+          rows="10"
+          placeholder="Paste raw text, email tables, or Excel cells here..."
+          value=${pastedText}
+          onInput=${e => setPastedText(e.target.value)}
+          style="width:100%; font-family:'IBM Plex Mono',monospace; font-size:11.5px; padding:12px; border:1px solid var(--border-strong); border-radius:var(--radius-sm);"
+        ></textarea>
+        <button class="btn pri" style="margin-top:12px; width:100%; justify-content:center;" disabled=${busy} onClick=${sendText}>
+          ${busy ? "Parsing Data..." : "⚡ Parse & Ingest Catalog"}
+        </button>
+      </div>
+    `}
+
+    ${err && html`<p style="color:var(--blocked); font-size:12px; margin-top:12px;" role="alert">${err}</p>`}
+  </div>`;
+}
+
+function ColumnSetupModal({ file, onClose }) {
+  const [mappings, setMappings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    getJSON(`/api/files/${file.file_id}/columns`)
+      .then(d => { setMappings(d.mappings); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [file.file_id]);
+
+  const togglePrimary = idx => {
+    setMappings(prev => prev.map((m, i) => i === idx ? { ...m, use_in_primary: !m.use_in_primary } : m));
+  };
+
+  const handleSave = async () => {
+    setBusy(true);
+    try {
+      await api(`/api/files/${file.file_id}/columns`, { json: { mappings } });
+      onClose();
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return html`<div class="scrim mid"><div class="modal" role="dialog" aria-label="Confirm title building columns" onClick=${e => e.stopPropagation()}>
+    <h3>Step 1: Confirm Title-Building Columns</h3>
+    <p class="mute" style="font-size:12px; margin:0;">Select which source columns represent product identity & specifications for title building:</p>
+    
+    ${loading ? html`<p class="mute">Analyzing workbook columns...</p>` : html`
+      <div style="max-height:50vh; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:4px 0;">
+        ${mappings.map((m, i) => html`
+          <label key=${m.column} style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:#f8fafc; border:1px solid var(--border); border-radius:var(--radius-sm); cursor:pointer;">
+            <div>
+              <div style="font-weight:600; font-size:12.5px;">${m.column}</div>
+              <small class="mute">${m.use_in_primary ? "✓ Primary Title Context" : "• Metadata Only (Ignored in Title)"}</small>
+            </div>
+            <input type="checkbox" checked=${m.use_in_primary} onChange=${() => togglePrimary(i)} />
+          </label>
+        `)}
+      </div>
+    `}
+
+    <div class="foot">
+      <button class="btn" onClick=${onClose}>Close</button>
+      <button class="btn pri" disabled=${busy || loading} onClick=${handleSave}>${busy ? "Building Contexts..." : "Confirm & Build Contexts ✓"}</button>
+    </div>
+  </div></div>`;
+}
+
+function Drawer({ row, onClose, onSave }) {
+  const [f, setF] = useState({
+    cleaned_title: row.cleaned_title || "",
+    brand_name: row.brand_name || "",
+    parent_company: row.parent_company || "",
+    invoice_name: row.invoice_name || "",
+    hsn_code: row.hsn_code || "",
+    country_of_origin: row.country_of_origin || "",
+    product_type: row.product_type || "",
+    item_type: row.item_type || "Saleable",
+    gmr_taxonomy: row.gmr_taxonomy || ""
+  });
+  const [prop, setProp] = useState(""), [busy, setBusy] = useState(false);
+
+  const save = async () => {
+    setBusy(true);
+    const p = f.brand_name !== row.brand_name && prop.trim() ? {
+      field_name: "brand_name",
+      target_value: f.brand_name,
+      matching_text: prop.trim(),
+      match_source_field: "Universal_Raw_Context"
+    } : null;
+    await onSave(f, p);
+    setBusy(false);
+  };
+
+  const attrs = Object.entries(row.attributes || {});
+
+  return html`<div class="scrim" onClick=${onClose}><aside class="drawer" role="dialog" aria-label=${"Edit row " + row.sr_no} onClick=${e => e.stopPropagation()}>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h3>Edit Row #${row.sr_no}</h3>
+      <button class="btn sm" onClick=${onClose}>✕</button>
+    </div>
+    
+    <div class="section-box">
+      <div class="mute" style="font-size:11px; font-weight:700; text-transform:uppercase;">1. Universal Raw Source Text (Read-Only)</div>
+      <div class="ctx">${row.universal_raw_context}</div>
+    </div>
+
+    <div class="section-box">
+      <div class="mute" style="font-size:11px; font-weight:700; text-transform:uppercase;">2. Core Product Identity</div>
+      <label class="field">Cleaned Title (Pass 2)
+        <input value=${f.cleaned_title} onInput=${e => setF({ ...f, cleaned_title: e.target.value })} />
+      </label>
+      <div class="grid-2">
+        <label class="field">Brand Name
+          <input value=${f.brand_name} onInput=${e => setF({ ...f, brand_name: e.target.value })} />
+        </label>
+        <label class="field">Parent Company
+          <input value=${f.parent_company} onInput=${e => setF({ ...f, parent_company: e.target.value })} />
+        </label>
+      </div>
+      <label class="field">Invoice Name (${f.invoice_name.length}/33 chars)
+        <input value=${f.invoice_name} maxlength="33" onInput=${e => setF({ ...f, invoice_name: e.target.value.toUpperCase() })} class="mono" />
+      </label>
+      ${f.brand_name !== (row.brand_name || "") ? html`
+        <label class="field" style="background:var(--primary-subtle); padding:8px; border-radius:var(--radius-sm); border:1px solid #bfdbfe;">
+          <span>Smart Propagate Brand:</span>
+          <input value=${prop} onInput=${e => setProp(e.target.value)} placeholder="e.g. Substring to match in other rows" />
+        </label>
+      ` : ""}
+    </div>
+
+    <div class="section-box">
+      <div class="mute" style="font-size:11px; font-weight:700; text-transform:uppercase;">3. Taxonomy & Classification</div>
+      <div class="grid-2">
+        <label class="field">Product Type
+          <input value=${f.product_type} onInput=${e => setF({ ...f, product_type: e.target.value })} />
+        </label>
+        <label class="field">Item Type
+          <select value=${f.item_type} onChange=${e => setF({ ...f, item_type: e.target.value })}>
+            <option value="Saleable">Saleable</option>
+            <option value="Non-Saleable">Non-Saleable</option>
+          </select>
+        </label>
+      </div>
+      <label class="field">GMR Taxonomy Path
+        <input value=${f.gmr_taxonomy} onInput=${e => setF({ ...f, gmr_taxonomy: e.target.value })} class="mono" />
+      </label>
+    </div>
+
+    <div class="section-box">
+      <div class="mute" style="font-size:11px; font-weight:700; text-transform:uppercase;">4. Logistics & Provenance</div>
+      <div class="grid-2">
+        <label class="field">HSN Code (6-Digit)
+          <input value=${f.hsn_code} onInput=${e => setF({ ...f, hsn_code: e.target.value })} class="mono" />
+        </label>
+        <label class="field">Country of Origin
+          <input value=${f.country_of_origin} onInput=${e => setF({ ...f, country_of_origin: e.target.value })} />
+        </label>
+      </div>
+    </div>
+
+    ${attrs.length > 0 ? html`
+      <div class="section-box">
+        <div class="mute" style="font-size:11px; font-weight:700; text-transform:uppercase;">5. Category Attributes (Canonical Schema)</div>
+        <dl style="display:grid; grid-template-columns:auto 1fr; gap:4px 14px; margin:0; font-size:12px;">
+          ${attrs.map(([k, v]) => html`<dt style="color:var(--text-muted); font-weight:600;">${k}</dt><dd style="margin:0; font-family:'IBM Plex Mono',monospace;">${typeof v === "object" ? JSON.stringify(v) : (v || "NA")}</dd>`)}
+        </dl>
+      </div>
+    ` : ""}
+
+    <div class="foot">
+      <button class="btn" onClick=${onClose}>Cancel</button>
+      <button class="btn pri" disabled=${busy} onClick=${save}>${busy ? "Saving..." : "Save & Mark Reviewed ✓"}</button>
+    </div>
+  </aside></div>`;
+}
+
+function ExportModal({ m, onClose, onGo }) {
+  const bad = m.blocked > 0 || m.review_required > 0;
+  return html`<div class="scrim mid" onClick=${onClose}><div class="modal" role="dialog" aria-label="Pre-flight export checklist" onClick=${e => e.stopPropagation()}>
+    <h3>Pre-Flight Export Checklist</h3>
+    <p class="mute" style="font-size:12px; margin:0;">Verifying data completion before generating final 42-column master workbook:</p>
+    <div class=${"check " + (m.review_required ? "a" : "g")}><span>Rows needing human review</span><b>${m.review_required}</b></div>
+    <div class=${"check " + (m.blocked ? "r" : "g")}><span>Blocked rows (missing base code)</span><b>${m.blocked}</b></div>
+    <div class="check v"><span>Intra-file duplicate reuses</span><b>${m.duplicates}</b></div>
+    <div class="foot">
+      <button class="btn" onClick=${onClose}>Keep Reviewing</button>
+      <button class="btn pri" onClick=${onGo}>${bad ? "Download Anyway" : "Download Excel"}</button>
+    </div>
+  </div></div>`;
+}
+
+function Workspace({ file, onExit, onOpenColumns }) {
+  const id = file.file_id;
+  const [job, setJob] = useState({ status: "IDLE", active_stage: "", progress_percent: 0, message: "" });
+  const [m, setM] = useState({ total: file.total_rows || 0, clean: 0, review_required: 0, blocked: 0, duplicates: 0, issue_clusters: {} });
+  const [rows, setRows] = useState([]), [total, setTotal] = useState(0), [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1), [limit, setLimit] = useState(50);
+  const [status, setStatus] = useState("ALL"), [cluster, setCluster] = useState(null);
+  const [search, setSearch] = useState(""), [q, setQ] = useState("");
+  const [selected, setSelected] = useState(new Set()), [editing, setEditing] = useState(null), [focus, setFocus] = useState(0);
+  const [hint, setHint] = useState(""), [rerun, setRerun] = useState("TITLE"), [exportOpen, setExportOpen] = useState(false);
+  const [toasts, setToasts] = useState([]), [tick, setTick] = useState(0);
+  // In Workspace component of frontend/index.html:
+
+  // Add this ref inside Workspace():
+  const syncInp = useRef();
+
+  const handleSyncExcel = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const d = await getJSON(`/api/files/${id}/sync-excel`, { method: "POST", body: formData });
+      notify(d.message);
+      reload();
+      refreshStatus();
+    } catch (err) {
+      notify(err.message, "err");
+    } finally {
+      e.target.value = ""; // Reset file input
+    }
+  };
+
+  const prevStatusRef = useRef("IDLE");
+  const reload = () => setTick(t => t + 1);
+  const notify = (msg, kind = "ok") => {
+    const k = Math.random();
+    setToasts(t => [...t, { k, msg, kind }]);
+    setTimeout(() => setToasts(t => t.filter(x => x.k !== k)), 4000);
+  };
+
+  const refreshStatus = useCallback(async () => {
+    try {
+      const d = await getJSON(`/api/files/${id}/status`);
+      setM(d.metrics);
+      setJob(d.job);
+
+      if (prevStatusRef.current === "RUNNING" && d.job.status !== "RUNNING") {
+        reload();
+        if (d.job.status === "COMPLETED") notify(d.job.message || "Stage completed.");
+      }
+      prevStatusRef.current = d.job.status;
+    } catch {}
+  }, [id]);
+
+  // Regular continuous polling that survives page changes & background runs
+  useEffect(() => {
+    refreshStatus();
+    const timer = setInterval(refreshStatus, 2000);
+    return () => clearInterval(timer);
+  }, [refreshStatus]);
+
+  useEffect(() => {
+    const t = setTimeout(() => { setQ(search); setPage(1); }, 250);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  useEffect(() => {
+    const ac = new AbortController();
+    setLoading(true);
+    const p = new URLSearchParams({ page, limit, status_filter: status, search: q });
+    if (cluster) p.set("cluster_filter", cluster);
+    getJSON(`/api/files/${id}/rows?${p}`, { signal: ac.signal })
+      .then(d => { setRows(d.rows); setTotal(d.total_records); setFocus(0); setLoading(false); })
+      .catch(e => { if (e.name !== "AbortError") { notify(e.message, "err"); setLoading(false); } });
+    return () => ac.abort();
+  }, [id, page, limit, status, cluster, q, tick]);
+
+  const pick = (s, c = null) => { setStatus(s); setCluster(c); setPage(1); };
+  const toggle = rid => setSelected(s => { const n = new Set(s); n.has(rid) ? n.delete(rid) : n.add(rid); return n; });
+  const ids = [...selected];
+  const running = job.status === "RUNNING";
+
+  const run = async (stage, rowIds = []) => {
+    setJob(j => ({ ...j, status: "RUNNING", active_stage: stage, progress_percent: 5, message: "Starting..." }));
+    try {
+      await api(`/api/files/${id}/stages/run`, {
+        json: { stage, check_master: true, selected_row_ids: rowIds.map(S), operator_hint: hint }
+      });
+      setSelected(new Set());
+    } catch (e) {
+      if (e.status === 409) {
+        notify("A stage is currently already running in the background.", "err");
+      } else {
+        notify(e.message, "err");
+      }
+      refreshStatus();
+    }
+  };
+
+  const approve = async list => {
+    try {
+      for (let i = 0; i < list.length; i += 8) {
+        await Promise.all(list.slice(i, i + 8).map(x => api(`/api/files/${id}/rows/${x}`, { method: "PATCH", json: {} })));
+      }
+      notify(`${list.length} row${list.length > 1 ? "s" : ""} marked reviewed.`);
+      setSelected(new Set());
+      reload();
+      refreshStatus();
+    } catch (e) { notify(e.message, "err"); }
+  };
+
+  const saveRow = async (updatedFields, prop) => {
+    try {
+      await api(`/api/files/${id}/rows/${editing.sr_no}`, { method: "PATCH", json: updatedFields });
+      if (prop) notify((await getJSON(`/api/files/${id}/smart-propagate`, { json: prop })).message);
+      else notify(`Row #${editing.sr_no} saved.`);
+      setEditing(null);
+      reload();
+      refreshStatus();
+    } catch (e) { notify(e.message, "err"); }
+  };
+
+  const unlink = async rid => {
+    try {
+      const d = await getJSON(`/api/files/${id}/unlink-duplicate/${rid}`, { method: "POST" });
+      notify(d.message);
+      reload();
+      refreshStatus();
+    } catch (e) { notify(e.message, "err"); }
+  };
+
+  const undo = async () => {
+    if (!confirm("Rollback item numbers allocated for this file?")) return;
+    try {
+      await api(`/api/files/${id}/undo`, { method: "POST" });
+      notify("Allocations reverted.");
+      refreshStatus();
+      reload();
+    } catch (e) { notify(e.message, "err"); }
+  };
+
+  const download = () => {
+    const a = document.createElement("a");
+    a.href = `${BASE}/api/files/${id}/export`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setExportOpen(false);
+  };
+
+  useEffect(() => {
+    const h = e => {
+      if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || editing || exportOpen || e.metaKey || e.ctrlKey || e.altKey) return;
+      const r = rows[focus];
+      if (e.key === "ArrowDown" || e.key === "j") { e.preventDefault(); setFocus(f => Math.min(f + 1, rows.length - 1)); }
+      else if (e.key === "ArrowUp" || e.key === "k") { e.preventDefault(); setFocus(f => Math.max(f - 1, 0)); }
+      else if (!r) return;
+      else if (e.key === "Enter") setEditing(r);
+      else if (e.key === "a") approve([S(r.sr_no)]);
+      else if (e.key === "x") toggle(S(r.sr_no));
+    };
+    addEventListener("keydown", h);
+    return () => removeEventListener("keydown", h);
+  }, [rows, focus, editing, exportOpen]);
+
+  useEffect(() => { document.querySelector('tr[data-f="1"]')?.scrollIntoView({ block: "nearest" }); }, [focus]);
+
+  const pages = Math.max(1, Math.ceil(total / limit));
+  const allOn = rows.length > 0 && rows.every(r => selected.has(S(r.sr_no)));
+  const cards = [
+    ["ALL", "All Products", m.total, ""],
+    ["CLEAN", "Verified Clean", m.clean, "g"],
+    ["REVIEW_REQUIRED", "Needs Review", m.review_required, "a"],
+    ["BLOCKED", "Blocked SKUs", m.blocked, "r"],
+    ["DUPLICATES", "Intra-File Reuses", m.duplicates, "v"]
+  ];
+
+  return html`
+<header class="navbar">
+  <div class="brand">
+    <span class="mark">GMR</span>
+    <div>
+      <h1>Master Catalog Engine</h1>
+      <small>${file.file_name} · ${m.total.toLocaleString()} products</small>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn" onClick=${onOpenColumns}>⚙ Configure Columns</button>
+    <button class="btn" onClick=${onExit}>Change File</button>
+    <button class="btn" onClick=${() => syncInp.current.click()} title="Upload modified Excel to sync edited Cleaned Titles">
+      📤 Import Edited Excel
+    </button>
+    <input ref=${syncInp} type="file" hidden accept=".xlsx,.xls,.xlsb" onChange=${handleSyncExcel} />
+    <button class="btn gold" disabled=${running} onClick=${() => run("AUTO_PILOT")}>
+      ${running ? "Processing..." : "⚡ Run Auto-Pilot"}
+    </button>
+    <button class="btn pri" onClick=${() => setExportOpen(true)}>📥 Export Excel</button>
+  </div>
+</header>
+
+  <main class="wrap">
+    <section class="panel steps" aria-label="Pipeline stages">
+      ${STAGES.map(([k, l], i) => html`
+        <button key=${k} class=${"step" + (running && job.active_stage === k ? " on" : "")} disabled=${running} onClick=${() => run(k)} title=${"Run: " + l}>
+          <small>Stage 0${i + 1}</small>
+          <b>${l}</b>
+        </button>
+      `)}
+    </section>
+
+    ${running ? html`
+      <div class="panel live" role="status">
+        <div class="bar"><i style=${`width:${job.progress_percent}%`}></i></div>
+        <span>${job.message || "Working..."} (${job.progress_percent}%)</span>
+      </div>
+    ` : ""}
+
+    ${job.status === "ERROR" ? html`
+      <div class="panel live err" role="alert">
+        <b>Stage Alert:</b> ${job.error || job.message}
+      </div>
+    ` : ""}
+
+    <section class="cards" aria-label="Quality summary">
+      ${cards.map(([s, l, n, t]) => html`
+        <button key=${s} class=${"card " + t + (status === s && !cluster ? " on" : "")} onClick=${() => pick(s)}>
+          <b>${n.toLocaleString()}</b>
+          <small>${l}</small>
+        </button>
+      `)}
+    </section>
+
+    ${Object.entries(CLUSTERS).some(([k]) => m.issue_clusters?.[k] > 0) ? html`
+      <div class="chips">
+        <span class="mute" style="font-weight:700; font-size:11px; text-transform:uppercase;">Quick Issue Filter:</span>
+        ${Object.entries(CLUSTERS).map(([k, l]) => m.issue_clusters?.[k] > 0 ? html`
+          <button key=${k} class=${"chip" + (cluster === k ? " on" : "")} onClick=${() => cluster === k ? pick("ALL") : pick("ALL", k)}>
+            ${l} (${m.issue_clusters[k]})
+          </button>
+        ` : "")}
+      </div>
+    ` : ""}
+
+    ${selected.size > 0 ? html`
+      <div class="bulk">
+        <b>${selected.size} selected</b>
+        <select value=${rerun} onChange=${e => setRerun(e.target.value)} aria-label="Select stage to rerun">
+          ${STAGES.filter(([k]) => k !== "UNICODE" && k !== "FIELD_MAP" && k !== "ITEM_TYPE" && k !== "PRODUCT_TYPE").map(([k, l]) => html`
+            <option value=${k}>${l}</option>
+          `)}
+        </select>
+        <input placeholder="Optional AI operator hint, e.g. Brand is Byredo, 100ml" value=${hint} onInput=${e => setHint(e.target.value)} />
+        <button class="btn gold" disabled=${running} onClick=${() => run(rerun, ids)}>Re-run on Selected</button>
+        <button class="btn sm" onClick=${() => approve(ids)}>Mark Reviewed</button>
+        <button class="btn sm" style="background:transparent; color:#fff; border-color:#475569;" onClick=${() => setSelected(new Set())}>Clear</button>
+      </div>
+    ` : ""}
+
+    <section class="panel">
+      <div class="toolbar">
+        <input type="search" placeholder="Search title, brand, source text or item number..." value=${search} onInput=${e => setSearch(e.target.value)} aria-label="Search records" />
+        <span class="mute"><kbd>↓</kbd> <kbd>↑</kbd> move · <kbd>Enter</kbd> edit · <kbd>A</kbd> approve · <kbd>X</kbd> select</span>
+        <button class="btn sm" disabled=${running} onClick=${undo}>Undo Item Numbers</button>
+      </div>
+
+      ${!loading && rows.length === 0 ? html`
+        <div style="padding:48px; text-align:center; color:var(--text-muted);">No products match the selected criteria.</div>
+      ` : html`
+        <div class=${"tablebox" + (loading ? " busy" : "")}>
+          <table>
+            <thead>
+              <tr>
+                <th style="width:36px; text-align:center;">
+                  <input type="checkbox" checked=${allOn} aria-label="Select page" onChange=${() => setSelected(s => { const n = new Set(s); rows.forEach(r => allOn ? n.delete(S(r.sr_no)) : n.add(S(r.sr_no))); return n; })} />
+                </th>
+                <th style="width:50px;">#</th>
+                <th style="width:90px;">Status</th>
+                <th style="width:130px;">Item Number</th>
+                <th>Cleaned Title</th>
+                <th style="width:130px;">Brand</th>
+                <th style="width:130px;">Product Type</th>
+                <th>GMR Taxonomy</th>
+                <th style="width:65px; text-align:center;">Base</th>
+                <th style="width:110px; text-align:right;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map((r, i) => {
+                const rid = S(r.sr_no);
+                const [tone, label] = BADGE[r.status_badge] || ["mute", r.status_badge];
+                return html`
+                  <tr key=${rid} data-f=${i === focus ? 1 : 0} class=${(i === focus ? "focus " : "") + (selected.has(rid) ? "sel" : "")} onClick=${() => setFocus(i)}>
+                    <td style="text-align:center;" onClick=${e => e.stopPropagation()}>
+                      <input type="checkbox" checked=${selected.has(rid)} onChange=${() => toggle(rid)} aria-label=${"Select row " + rid} />
+                    </td>
+                    <td class="mute mono">${rid}</td>
+                    <td><span class=${"badge " + tone}>${label}</span></td>
+                    <td class="mono" style="white-space:nowrap;">
+                      ${r.item_number || "—"}
+                      ${r.status_badge === "DUPLICATE" ? html`
+                        <button class="link" onClick=${e => { e.stopPropagation(); unlink(rid); }} title="Generate new unique item number">Unlink</button>
+                      ` : ""}
+                    </td>
+                    <td class="title">
+                      ${r.cleaned_title || "—"}
+                      <div class="sub" title=${r.universal_raw_context}>${r.universal_raw_context}</div>
+                      ${r.audit_notes ? html`<div class="note">${r.audit_notes}</div>` : ""}
+                    </td>
+                    <td>${r.brand_name || "—"}</td>
+                    <td>${r.product_type || "—"}</td>
+                    <td class="tax" title=${r.gmr_taxonomy}>${r.gmr_taxonomy || "—"}</td>
+                    <td class="mono" style="text-align:center;">${r.base_code || "—"}</td>
+                    <td style="text-align:right; white-space:nowrap;" onClick=${e => e.stopPropagation()}>
+                      <button class="btn sm" onClick=${() => setEditing(r)}>Edit</button>
+                      ${r.status_badge === "REVIEW" ? html`
+                        <button class="btn sm" style="margin-left:4px;" onClick=${() => approve([rid])}>Approve</button>
+                      ` : ""}
+                    </td>
+                  </tr>
+                `;
+              })}
+            </tbody>
+          </table>
+        </div>
+      `}
+
+      <div class="pager">
+        <span class="mute">${total.toLocaleString()} matching products</span>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <select value=${limit} onChange=${e => { setLimit(+e.target.value); setPage(1); }} aria-label="Page limit">
+            ${[25, 50, 100, 250].map(n => html`<option value=${n}>${n} per page</option>`)}
+          </select>
+          <button class="btn sm" disabled=${page <= 1} onClick=${() => setPage(page - 1)}>Previous</button>
+          <span>Page ${page} of ${pages}</span>
+          <button class="btn sm" disabled=${page >= pages} onClick=${() => setPage(page + 1)}>Next</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  ${editing ? html`<${Drawer} key=${editing.sr_no} row=${editing} onClose=${() => setEditing(null)} onSave=${saveRow} />` : ""}
+  ${exportOpen ? html`<${ExportModal} m=${m} onClose=${() => setExportOpen(false)} onGo=${download} />` : ""}
+
+  <div class="toasts" aria-live="polite">
+    ${toasts.map(t => html`<div key=${t.k} class=${"toast " + (t.kind === "err" ? "err" : "")}>${t.msg}</div>`)}
+  </div>
+  `;
+}
+
+render(html`<${App} />`, document.getElementById("app"));
+</script>
+</body>
+</html>

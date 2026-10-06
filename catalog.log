@@ -1,0 +1,24 @@
+2026-09-29 17:12:32,934 | INFO | stage=API_PIPELINE_ERROR event=failure file_id=c9d75d27ce96468e85fc1d38f2ceae34 error=[SSL: TLSV1_ALERT_DECODE_ERROR] tlsv1 alert decode error (_ssl.c:1028)
+2026-09-29 17:22:36,766 | INFO | stage=FIELD_MAP event=heuristic_complete file_id=c9d75d27ce96468e85fc1d38f2ceae34 columns=4
+2026-09-29 17:22:58,357 | INFO | stage=PRODUCT_TYPE event=file_loaded file_id=c9d75d27ce96468e85fc1d38f2ceae34 rows=108
+2026-09-29 17:23:06,435 | INFO | stage=PRODUCT_TYPE event=stored file_id=c9d75d27ce96468e85fc1d38f2ceae34 rows=108 batch_id=direct-execution
+2026-09-29 17:23:06,454 | INFO | stage=TITLE event=start file_id=c9d75d27ce96468e85fc1d38f2ceae34 rows=108
+2026-09-29 17:23:31,220 | INFO | stage=TITLE event=pass1_stored file_id=c9d75d27ce96468e85fc1d38f2ceae34 rows=108
+2026-09-29 17:24:04,296 | INFO | stage=TITLE event=pass2_stored file_id=c9d75d27ce96468e85fc1d38f2ceae34 rows=108
+2026-09-29 17:28:44,178 | INFO | stage=TAXONOMY event=start file_id=c9d75d27ce96468e85fc1d38f2ceae34 rows=108
+2026-09-29 17:30:59,831 | INFO | stage=API_PIPELINE_ERROR event=failure file_id=c9d75d27ce96468e85fc1d38f2ceae34 error=17
+2026-09-29 17:41:10,263 | INFO | stage=EXPORT event=start file_id=c9d75d27ce96468e85fc1d38f2ceae34 rows=108 target=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_c9d75d27.xlsx
+2026-09-29 17:41:10,686 | INFO | stage=EXPORT event=completed path=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_c9d75d27.xlsx
+2026-09-29 17:42:45,714 | INFO | stage=TAXONOMY event=start file_id=c9d75d27ce96468e85fc1d38f2ceae34 rows=108
+2026-09-29 17:45:03,393 | INFO | stage=API_PIPELINE_ERROR event=failure file_id=c9d75d27ce96468e85fc1d38f2ceae34 error=17
+2026-09-29 17:49:09,352 | INFO | stage=TAXONOMY event=start file_id=c9d75d27ce96468e85fc1d38f2ceae34 rows=108
+2026-09-29 17:50:07,348 | INFO | stage=TAXONOMY event=pass1_stored file_id=c9d75d27ce96468e85fc1d38f2ceae34 rows=108
+2026-10-06 11:15:20,769 | INFO | stage=PRODUCT_TYPE event=file_loaded file_id=34cdb50d352e468eaa0dc7e14d860852 rows=71
+2026-10-06 11:15:34,386 | INFO | stage=PRODUCT_TYPE event=stored file_id=34cdb50d352e468eaa0dc7e14d860852 rows=71 batch_id=direct-execution
+2026-10-06 11:15:47,188 | INFO | stage=TITLE event=start file_id=34cdb50d352e468eaa0dc7e14d860852 rows=71
+2026-10-06 11:16:10,251 | INFO | stage=TITLE event=pass1_stored file_id=34cdb50d352e468eaa0dc7e14d860852 rows=71
+2026-10-06 11:16:35,013 | INFO | stage=TITLE event=pass2_stored file_id=34cdb50d352e468eaa0dc7e14d860852 rows=71
+2026-10-06 11:17:22,563 | INFO | stage=EXPORT event=start file_id=34cdb50d352e468eaa0dc7e14d860852 rows=71 target=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_34cdb50d.xlsx
+2026-10-06 11:17:22,676 | INFO | stage=EXPORT event=completed path=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_34cdb50d.xlsx
+2026-10-06 11:20:29,023 | INFO | stage=EXPORT event=start file_id=34cdb50d352e468eaa0dc7e14d860852 rows=71 target=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_34cdb50d.xlsx
+2026-10-06 11:20:29,225 | INFO | stage=EXPORT event=completed path=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_34cdb50d.xlsx

@@ -1,0 +1,1758 @@
+[
+    {
+        "main_category": "Whisky",
+        "attributes": [
+            {
+                "name": "Volume_cl",
+                "description": "Volume in centiliters (e.g. 5/20/37.5/50/70/100cl, etc)"
+            },
+            {
+                "name": "Alcohol_by_Volume_%",
+                "description": "ABV percentage (write percentage symbol)"
+            },
+            {
+                "name": "Whisky_Type",
+                "description": "Single Malt/Blended/Grain/Single Pot Still/Bourbon/Rye"
+            },
+            {
+                "name": "Age_Statement",
+                "description": "Age in years (UnAged if no age statement)"
+            },
+            {
+                "name": "Region",
+                "description": "Speyside/Islay/Highland/Lowland/Campbeltown/Irish/Japanese/American/Indian"
+            },
+            {
+                "name": "Cask_Type",
+                "description": "Bourbon/Sherry/Madeira/Port/Wine/Virgin Oak/Ex-Rum"
+            },
+            {
+                "name": "Tasting_Notes",
+                "description": "Flavor profile description"
+            },
+            {
+                "name": "Gift_Box",
+                "description": "Gift packaging included – Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Vodka",
+        "attributes": [
+            {
+                "name": "Volume_cl",
+                "description": "Volume in centiliters (e.g. 5/20/37.5/50/70/100cl, etc)"
+            },
+            {
+                "name": "Alcohol_by_Volume_%",
+                "description": "ABV percentage (write percentage symbol)"
+            },
+            {
+                "name": "Base_Ingredient",
+                "description": "Wheat/Rye/Potato/Corn/Grape/Coconut"
+            },
+            {
+                "name": "Age_Statement",
+                "description": "Age in years (UnAged in most Vodkas)"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country/region of production (e.g. Swedish, Russian, Dutch, Spanish)"
+            },
+            {
+                "name": "Flavor",
+                "description": "Unflavored/Flavored – specify flavor if applicable (e.g. Coconut, Peach, Apple)"
+            },
+            {
+                "name": "Tasting_Notes",
+                "description": "Flavor profile description"
+            },
+            {
+                "name": "Gift_Box",
+                "description": "Gift packaging included – Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Gin",
+        "attributes": [
+            {
+                "name": "Volume_cl",
+                "description": "Volume in centiliters (e.g. 5/20/37.5/50/70/100cl, etc)"
+            },
+            {
+                "name": "Alcohol_by_Volume_%",
+                "description": "ABV percentage (write percentage symbol)"
+            },
+            {
+                "name": "Gin_Type",
+                "description": "London Dry/Contemporary/Navy Strength/Old Tom/Sloe/Indian Dry"
+            },
+            {
+                "name": "Age_Statement",
+                "description": "Age in years (UnAged if no age statement)"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country of production (e.g. English, French, Indian, American)"
+            },
+            {
+                "name": "Botanicals",
+                "description": "Key botanicals used"
+            },
+            {
+                "name": "Tasting_Notes",
+                "description": "Flavor profile description"
+            },
+            {
+                "name": "Gift_Box",
+                "description": "Gift packaging included – Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Rum",
+        "attributes": [
+            {
+                "name": "Volume_cl",
+                "description": "Volume in centiliters (e.g. 5/20/37.5/50/70/100cl, etc)"
+            },
+            {
+                "name": "Alcohol_by_Volume_%",
+                "description": "ABV percentage (write percentage symbol)"
+            },
+            {
+                "name": "Rum_Type",
+                "description": "White/Gold/Dark/Spiced/Aged/Overproof/Flavored/Cream"
+            },
+            {
+                "name": "Age_Statement",
+                "description": "Age in years (UnAged if no age statement)"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country/region of production (e.g. Caribbean, Cuban, Jamaican, Barbadian)"
+            },
+            {
+                "name": "Cask_Type",
+                "description": "Barrel/cask type used for aging"
+            },
+            {
+                "name": "Tasting_Notes",
+                "description": "Flavor profile description"
+            },
+            {
+                "name": "Gift_Box",
+                "description": "Gift packaging included – Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Tequila & Mezcal",
+        "attributes": [
+            {
+                "name": "Volume_cl",
+                "description": "Volume in centiliters (e.g. 5/20/37.5/50/70/100cl, etc)"
+            },
+            {
+                "name": "Alcohol_by_Volume_%",
+                "description": "ABV percentage (write percentage symbol)"
+            },
+            {
+                "name": "Spirit_Type",
+                "description": "Tequila/Mezcal"
+            },
+            {
+                "name": "Classification",
+                "description": "Blanco/Silver/Reposado/Añejo/Extra Añejo/Cristalino/Milenio"
+            },
+            {
+                "name": "Region",
+                "description": "Region/country of origin (e.g. Jalisco/Oaxaca/Mexican)"
+            },
+            {
+                "name": "Agave_Type",
+                "description": "Blue Weber/Espadín/Tobalá/Tepeztate"
+            },
+            {
+                "name": "Tasting_Notes",
+                "description": "Flavor profile description"
+            },
+            {
+                "name": "Gift_Box",
+                "description": "Gift packaging included – Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Brandy & Cognac",
+        "attributes": [
+            {
+                "name": "Volume_cl",
+                "description": "Volume in centiliters (e.g. 5/20/37.5/50/70/100cl, etc)"
+            },
+            {
+                "name": "Alcohol_by_Volume_%",
+                "description": "ABV percentage (write percentage symbol)"
+            },
+            {
+                "name": "Type",
+                "description": "Cognac/Armagnac/Brandy/Napoleon/Calvados/Grappa"
+            },
+            {
+                "name": "Classification",
+                "description": "VS/VSOP/XO/Napoleon/Extra/Hors d'Age"
+            },
+            {
+                "name": "Region",
+                "description": "Grand Champagne/Petite Champagne/Borderies/French/Country of Origin"
+            },
+            {
+                "name": "Aging_Years",
+                "description": "Minimum aging in years (UnAged if no age statement)"
+            },
+            {
+                "name": "Tasting_Notes",
+                "description": "Flavor profile description"
+            },
+            {
+                "name": "Gift_Box",
+                "description": "Gift packaging included – Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Aperitifs & Vermouth",
+        "attributes": [
+            {
+                "name": "Volume_cl",
+                "description": "Volume in centiliters (e.g. 5/20/37.5/50/70/100cl, etc)"
+            },
+            {
+                "name": "Alcohol_by_Volume_%",
+                "description": "ABV percentage (write percentage symbol)"
+            },
+            {
+                "name": "Type",
+                "description": "Aperitif/Vermouth/Amaro/Absinthe/Bitters/Campari"
+            },
+            {
+                "name": "Age_Statement",
+                "description": "Age in years (UnAged if no age statement)"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country of production (e.g. Italian, French, Czech)"
+            },
+            {
+                "name": "Style",
+                "description": "Dry/Sweet/Extra Dry/Rosé/Bianco/Bitter"
+            },
+            {
+                "name": "Tasting_Notes",
+                "description": "Flavor profile description"
+            },
+            {
+                "name": "Gift_Box",
+                "description": "Gift packaging included – Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Liqueurs & Cordials",
+        "attributes": [
+            {
+                "name": "Volume_cl",
+                "description": "Volume in centiliters (e.g. 5/20/37.5/50/70/100cl, etc)"
+            },
+            {
+                "name": "Alcohol_by_Volume_%",
+                "description": "ABV percentage (write percentage symbol)"
+            },
+            {
+                "name": "Liqueur_Type",
+                "description": "Cream/Herbal/Coffee/Fruit/Nut/Floral/Triple Sec/Schnapps/Absinthe"
+            },
+            {
+                "name": "Age_Statement",
+                "description": "Age in years (UnAged if no age statement)"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country of production (e.g. Irish, Italian, French, South African)"
+            },
+            {
+                "name": "Base_Spirit",
+                "description": "Whisky/Rum/Vodka/Brandy/Neutral Spirit"
+            },
+            {
+                "name": "Tasting_Notes",
+                "description": "Flavor profile description"
+            },
+            {
+                "name": "Gift_Box",
+                "description": "Gift packaging included – Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Wine & Champagne",
+        "attributes": [
+            {
+                "name": "Volume_cl",
+                "description": "Volume in centiliters (e.g. 5/20/37.5/50/70/100cl, etc)"
+            },
+            {
+                "name": "Alcohol_by_Volume_%",
+                "description": "ABV percentage (write percentage symbol)"
+            },
+            {
+                "name": "Wine_Type",
+                "description": "Red/White/Rosé/Sparkling/Champagne/Prosecco/Cava/Dessert"
+            },
+            {
+                "name": "Vintage",
+                "description": "Year of harvest (NV if non-vintage)"
+            },
+            {
+                "name": "Region_Appellation",
+                "description": "Wine region or country (e.g. Bordeaux, Napa Valley, Chilean, Australian)"
+            },
+            {
+                "name": "Grape_Variety",
+                "description": "Primary grape varietals (e.g. Pinot Noir, Cabernet Sauvignon, Chardonnay)"
+            },
+            {
+                "name": "Sweetness_Level",
+                "description": "Dry/Off-Dry/Semi-Sweet/Sweet/Brut/Extra Brut"
+            },
+            {
+                "name": "Gift_Box",
+                "description": "Gift packaging included – Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Non-Alcoholic (0.0%)",
+        "attributes": [
+            {
+                "name": "Volume_cl",
+                "description": "Volume in centiliters (e.g. 5/20/37.5/50/70/100cl, etc)"
+            },
+            {
+                "name": "Spirit_Style",
+                "description": "Non-Alcoholic Wine/Beer/Spirit/Sparkling/Cocktail"
+            },
+            {
+                "name": "Age_Statement",
+                "description": "Age in years (UnAged if no age statement)"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country of production"
+            },
+            {
+                "name": "Flavor_Profile",
+                "description": "Flavor description"
+            },
+            {
+                "name": "Dietary_Attributes",
+                "description": "Vegan/Halal/Gluten-Free/Organic"
+            },
+            {
+                "name": "Sugar_Content",
+                "description": "Sugar content per 100ml"
+            },
+            {
+                "name": "Shelf_life",
+                "description": "Shelf life in months"
+            }
+        ]
+    },
+    {
+        "main_category": "Ready to Drink",
+        "attributes": [
+            {
+                "name": "Volume_cl",
+                "description": "Volume in centiliters (e.g. 5/20/37.5/50/70/100cl, etc)"
+            },
+            {
+                "name": "Alcohol_by_Volume_%",
+                "description": "ABV percentage"
+            },
+            {
+                "name": "RTD_Type",
+                "description": "Beer/Hard Seltzer/Pre-Mixed Cocktail/Cider/Hard Lemonade"
+            },
+            {
+                "name": "Age_Statement",
+                "description": "N/A for most RTD products"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country of production"
+            },
+            {
+                "name": "Flavor",
+                "description": "Flavor variant or beer style (e.g. Original, Extra, Lager)"
+            },
+            {
+                "name": "Packaging_Type",
+                "description": "Can/Bottle"
+            },
+            {
+                "name": "Shelf_life",
+                "description": "Shelf life in months"
+            }
+        ]
+    },
+    {
+        "main_category": "Tech Accessories",
+        "attributes": [
+            {
+                "name": "Accessory_Type",
+                "description": "Earphones/Headphones/Cable/Adapter/Charging Case/Power Bank/Cover/Stand"
+            },
+            {
+                "name": "Compatible_Brand",
+                "description": "Apple/Samsung/OnePlus/Universal"
+            },
+            {
+                "name": "Compatible_Device_Type",
+                "description": "Mobile/Tablet/Laptop/Universal"
+            },
+            {
+                "name": "Connectivity_Interface",
+                "description": "USB-A/USB-C/Lightning/3.5mm AUX/MagSafe/Wireless/Bluetooth"
+            },
+            {
+                "name": "Generation_Version",
+                "description": "Generation or version (e.g. 2nd Gen, 3rd Gen)"
+            },
+            {
+                "name": "Cable_Length_m",
+                "description": "Length in meters (for cables and adapters)"
+            },
+            {
+                "name": "Color",
+                "description": "Color of the accessory"
+            },
+            {
+                "name": "Power_Output_W",
+                "description": "Wattage output (for chargers and power banks)"
+            },
+            {
+                "name": "Power_Input_V",
+                "description": "Power input in volts"
+            }
+        ]
+    },
+    {
+        "main_category": "Accessories",
+        "attributes": [
+            {
+                "name": "Accessory_Type",
+                "description": "Travel Pillow/Bag/Wallet/Belt/Scarf/Hat/Keychain/Umbrella/Gloves"
+            },
+            {
+                "name": "Material",
+                "description": "Primary material (Memory Foam/Leather/Fabric/Metal/Synthetic)"
+            },
+            {
+                "name": "Color",
+                "description": "Primary color"
+            },
+            {
+                "name": "Gender",
+                "description": "Men/Women/Unisex"
+            },
+            {
+                "name": "Dimensions_cm",
+                "description": "Product dimensions"
+            },
+            {
+                "name": "Closure_Type",
+                "description": "Zip/Snap/Buckle/Magnetic/Open"
+            },
+            {
+                "name": "Suitable_For",
+                "description": "Travel/Everyday/Sports/Office"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Manufacturing country"
+            },
+            {
+                "name": "Gift_Box",
+                "description": "Gift packaging included – Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Apparel",
+        "attributes": [
+            {
+                "name": "Apparel_Type",
+                "description": "T-Shirt/Shirt/Jacket/Trousers/Shorts/Dress/Sweater/Hoodie/Socks/Beanie"
+            },
+            {
+                "name": "Gender",
+                "description": "Men/Women/Unisex/Kids"
+            },
+            {
+                "name": "Color",
+                "description": "Primary color"
+            },
+            {
+                "name": "Size",
+                "description": "XS/S/M/L/XL/XXL or numeric sizing (waist/EU)"
+            },
+            {
+                "name": "Season_Collection",
+                "description": "Season or collection label (e.g. SUMMER24, WINTER25)"
+            },
+            {
+                "name": "Material_Composition",
+                "description": "Fabric content (e.g. 100% Cotton, 60% Cotton 40% Polyester)"
+            },
+            {
+                "name": "Fit_Type",
+                "description": "Regular/Slim/Relaxed/Oversized"
+            },
+            {
+                "name": "Care_Instructions",
+                "description": "Washing and care guidance"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Manufacturing country"
+            }
+        ]
+    },
+    {
+        "main_category": "Personal Care",
+        "attributes": [
+            {
+                "name": "Product_Type",
+                "description": "Body Lotion/Body Cream/Serum/Deodorant/Body Wash/Shampoo/Conditioner/Hand Cream/Set"
+            },
+            {
+                "name": "Volume_ml_or_Weight_g",
+                "description": "Net volume or weight"
+            },
+            {
+                "name": "Skin_Hair_Type",
+                "description": "Normal/Oily/Dry/Combination/Sensitive/All Types"
+            },
+            {
+                "name": "Key_Ingredients",
+                "description": "Active or highlighted ingredients"
+            },
+            {
+                "name": "Format",
+                "description": "Individual/Duo/Set/Travel Size"
+            },
+            {
+                "name": "SPF",
+                "description": "Sun protection factor if applicable"
+            },
+            {
+                "name": "Gender",
+                "description": "Men/Women/Unisex"
+            },
+            {
+                "name": "Cruelty_Free",
+                "description": "Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Fragrance",
+        "attributes": [
+            {
+                "name": "Volume_ml",
+                "description": "Volume in milliliters (e.g. 30/50/75/100/150ml)"
+            },
+            {
+                "name": "Top_Notes",
+                "description": "Opening scent notes"
+            },
+            {
+                "name": "Heart_Notes",
+                "description": "Middle/heart scent notes"
+            },
+            {
+                "name": "Base_Notes",
+                "description": "Dry-down/base scent notes"
+            },
+            {
+                "name": "Concentration",
+                "description": "Extrait/EDP/EDT/EDC/Deodorant/Body Mist"
+            },
+            {
+                "name": "Gender",
+                "description": "Men/Women/Unisex"
+            },
+            {
+                "name": "Fragrance_Family",
+                "description": "Floral/Oriental/Woody/Fresh/Citrus/Gourmand/Aromatic"
+            },
+            {
+                "name": "Gift_Set",
+                "description": "Yes/No – part of a gift set or duo pack"
+            },
+            {
+                "name": "Limited_Edition",
+                "description": "Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Beverages",
+        "attributes": [
+            {
+                "name": "Beverage_Type",
+                "description": "Coffee/Tea/Juice/Water/Energy Drink/Soft Drink/Hot Chocolate/Gift Set"
+            },
+            {
+                "name": "Weight_g_or_Volume_ml",
+                "description": "Net weight or volume"
+            },
+            {
+                "name": "Roast_or_Flavor",
+                "description": "Roast level or flavor variant (e.g. Light/Dark Roast, Green Mountain, Wild Fire)"
+            },
+            {
+                "name": "Format",
+                "description": "Ground/Whole Bean/Pods/Instant/Ready-to-Drink/Gift Box"
+            },
+            {
+                "name": "Caffeine_Content",
+                "description": "Caffeinated/Decaf/mg per serving"
+            },
+            {
+                "name": "Sugar_Content",
+                "description": "Regular/Sugar-Free/Low Sugar"
+            },
+            {
+                "name": "Dietary_Attributes",
+                "description": "Organic/Vegan/Gluten-Free/Natural/Halal"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country or region of production"
+            },
+            {
+                "name": "Shelf_life",
+                "description": "Shelf life in months"
+            }
+        ]
+    },
+    {
+        "main_category": "Books, Guides & Media",
+        "attributes": [
+            {
+                "name": "Product_Type",
+                "description": "Book/Travel Guide/Magazine/DVD/Map/Audio CD"
+            },
+            {
+                "name": "Genre_Subject",
+                "description": "Fiction/Non-Fiction/Travel/History/Children's/Self-Help/Art"
+            },
+            {
+                "name": "Author_Publisher",
+                "description": "Author or publisher name"
+            },
+            {
+                "name": "Language",
+                "description": "Language of content"
+            },
+            {
+                "name": "Format",
+                "description": "Hardcover/Paperback/Digital/CD/DVD"
+            },
+            {
+                "name": "Pages",
+                "description": "Number of pages (for books)"
+            },
+            {
+                "name": "Edition_Year",
+                "description": "Edition or publication year"
+            },
+            {
+                "name": "Age_Group",
+                "description": "Children/Young Adult/Adult/All Ages"
+            },
+            {
+                "name": "ISBN",
+                "description": "ISBN number"
+            }
+        ]
+    },
+    {
+        "main_category": "Candy",
+        "attributes": [
+            {
+                "name": "Candy_Type",
+                "description": "Gummy/Hard Candy/Jelly/Lollipop/Marshmallow/Caramel/Roulette"
+            },
+            {
+                "name": "Weight_g",
+                "description": "Net weight in grams"
+            },
+            {
+                "name": "Flavor",
+                "description": "Flavor variant(s) (e.g. Cola, Peach, Assorted, Multi-Flavour)"
+            },
+            {
+                "name": "Pack_Configuration",
+                "description": "Single/Multipack/Assorted Pack (e.g. 10 pieces, 16x450g)"
+            },
+            {
+                "name": "Sugar_Content",
+                "description": "Regular/Sugar-Free/Reduced Sugar"
+            },
+            {
+                "name": "Allergens",
+                "description": "Allergen information (nuts, dairy, gluten, soy)"
+            },
+            {
+                "name": "Dietary_Attributes",
+                "description": "Vegan/Halal/Gluten-Free/Kosher"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country of production"
+            },
+            {
+                "name": "Shelf_life",
+                "description": "Shelf life in months"
+            }
+        ]
+    },
+    {
+        "main_category": "Chocolates",
+        "attributes": [
+            {
+                "name": "Chocolate_Type",
+                "description": "Dark/Milk/White/Ruby/Praline/Truffle/Assorted/Liqueur"
+            },
+            {
+                "name": "Weight_g",
+                "description": "Net weight in grams"
+            },
+            {
+                "name": "Flavor_Filling",
+                "description": "Mint/Caramel/Hazelnut/Strawberry/Baileys/Plain/Assorted"
+            },
+            {
+                "name": "Cocoa_Percentage",
+                "description": "% cocoa content"
+            },
+            {
+                "name": "Piece_Count",
+                "description": "Number of pieces/units per pack"
+            },
+            {
+                "name": "Allergens",
+                "description": "Allergen information (nuts, dairy, soy, gluten)"
+            },
+            {
+                "name": "Dietary_Attributes",
+                "description": "Vegan/Halal/Kosher/Gluten-Free/Sugar-Free"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country of production"
+            },
+            {
+                "name": "Gift_Box",
+                "description": "Gift/collector tin or box packaging – Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Cigarettes",
+        "attributes": [
+            {
+                "name": "Pack_Count",
+                "description": "Total number of cigarettes per carton (e.g. 100/200/600)"
+            },
+            {
+                "name": "Variant",
+                "description": "Regular/Lights/King Size/Special Filter/Blue/Gold"
+            },
+            {
+                "name": "Pack_Size",
+                "description": "Number of cigarettes per individual pack (10/20/25)"
+            },
+            {
+                "name": "Filter_Type",
+                "description": "Standard/Charcoal/Recessed/No Filter"
+            },
+            {
+                "name": "Tar_mg",
+                "description": "Tar content in mg"
+            },
+            {
+                "name": "Nicotine_mg",
+                "description": "Nicotine content in mg"
+            },
+            {
+                "name": "Tobacco_Blend",
+                "description": "Virginia/Burley/Oriental/Blend"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country of manufacture"
+            },
+            {
+                "name": "Flavored",
+                "description": "Yes/No – specify flavor if applicable (e.g. Menthol)"
+            }
+        ]
+    },
+    {
+        "main_category": "Cigars",
+        "attributes": [
+            {
+                "name": "Cigar_Format",
+                "description": "Lancero/Robusto/Toro/Corona/Churchill/Belicoso/Geniales"
+            },
+            {
+                "name": "Pack_Count",
+                "description": "Number of cigars per box/pack (e.g. 4/5/10/15/25)"
+            },
+            {
+                "name": "Wrapper_Type",
+                "description": "Habano/Maduro/Natural/Connecticut/Brazil"
+            },
+            {
+                "name": "Strength",
+                "description": "Mild/Medium/Full"
+            },
+            {
+                "name": "Length_mm",
+                "description": "Cigar length in millimeters"
+            },
+            {
+                "name": "Ring_Gauge",
+                "description": "Ring gauge (diameter measurement)"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country of manufacture (e.g. Dominican Republic, Nicaragua, Cuba)"
+            },
+            {
+                "name": "Smoking_Time_mins",
+                "description": "Estimated smoking time in minutes"
+            },
+            {
+                "name": "Humidified_Packaging",
+                "description": "Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Detergents & Liquids",
+        "attributes": [
+            {
+                "name": "Product_Type",
+                "description": "Laundry Detergent/Dishwash Liquid/Fabric Softener/Surface Cleaner"
+            },
+            {
+                "name": "Weight_kg_or_Volume_L",
+                "description": "Net weight in kg or volume in liters"
+            },
+            {
+                "name": "Format",
+                "description": "Liquid/Powder/Gel/Tabs/Pods"
+            },
+            {
+                "name": "Variant",
+                "description": "Scent or color variant (e.g. Blue, Green, Lemon)"
+            },
+            {
+                "name": "Suitable_For",
+                "description": "Colours/Whites/All Fabrics/Delicates/Dishes"
+            },
+            {
+                "name": "Pack_Configuration",
+                "description": "Single/Twin Pack (e.g. 2x3kg)"
+            },
+            {
+                "name": "Number_of_Washes",
+                "description": "Estimated number of wash loads per pack"
+            },
+            {
+                "name": "Eco_Friendly",
+                "description": "Yes/No – biodegradable or eco certified"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country of manufacture"
+            }
+        ]
+    },
+    {
+        "main_category": "Eyewear",
+        "attributes": [
+            {
+                "name": "Eyewear_Type",
+                "description": "Sunglasses/Optical Frame/Reading Glasses/Sports Eyewear"
+            },
+            {
+                "name": "Gender",
+                "description": "Men/Women/Unisex"
+            },
+            {
+                "name": "Frame_Size",
+                "description": "Frame size (Small/Medium/Large)"
+            },
+            {
+                "name": "Frame_Material",
+                "description": "Acetate/Metal/Injected/Polyamide/Titanium/TR90"
+            },
+            {
+                "name": "Lens_Type",
+                "description": "Standard/Polarized/Gradient/Mirrored/CR39/Photochromic"
+            },
+            {
+                "name": "Frame_Color",
+                "description": "Frame color (e.g. Black, Gold, Light Gold, Tortoise)"
+            },
+            {
+                "name": "Lens_Thickness_mm",
+                "description": "Lens thickness in mm"
+            },
+            {
+                "name": "Lens_Color",
+                "description": "Lens tint or color (e.g. Dark Grey, Brown, Blue)"
+            },
+            {
+                "name": "UV_Protection",
+                "description": "UV400/UV380/CE"
+            }
+        ]
+    },
+    {
+        "main_category": "Gums & mints",
+        "attributes": [
+            {
+                "name": "Product_Type",
+                "description": "Chewing Gum/Bubble Gum/Mint/Breath Strip"
+            },
+            {
+                "name": "Pack_Configuration",
+                "description": "Pack count x pieces per pack (e.g. 20x5, 50x4)"
+            },
+            {
+                "name": "Flavor",
+                "description": "Spearmint/Banana/Cardamom/Orange/Grape/Peppermint/Ponty White"
+            },
+            {
+                "name": "Sugar_Content",
+                "description": "Regular/Sugar-Free/Xylitol"
+            },
+            {
+                "name": "Weight_g",
+                "description": "Net weight in grams"
+            },
+            {
+                "name": "Allergens",
+                "description": "Allergen information"
+            },
+            {
+                "name": "Dietary_Attributes",
+                "description": "Vegan/Halal/Gluten-Free/Kosher"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country of production"
+            },
+            {
+                "name": "Shelf_life",
+                "description": "Shelf life in months"
+            }
+        ]
+    },
+    {
+        "main_category": "Handicrafts & Art",
+        "attributes": [
+            {
+                "name": "Product_Type",
+                "description": "Figurine/Painting/Sculpture/Textile/Pottery/Decorative Item/Miniature"
+            },
+            {
+                "name": "Material",
+                "description": "Primary material (Wood/Ceramic/Metal/Fabric/Stone/Glass)"
+            },
+            {
+                "name": "Country_Regional_Origin",
+                "description": "Country or region of craft origin"
+            },
+            {
+                "name": "Dimensions_cm",
+                "description": "Product dimensions (H x W x D)"
+            },
+            {
+                "name": "Handmade",
+                "description": "Yes/No"
+            },
+            {
+                "name": "Cultural_Theme",
+                "description": "Cultural or artistic theme (e.g. Tribal/Mughal/Islamic/Modern)"
+            },
+            {
+                "name": "Color",
+                "description": "Primary color(s)"
+            },
+            {
+                "name": "Finish",
+                "description": "Painted/Lacquered/Natural/Gilded/Embroidered"
+            },
+            {
+                "name": "Gift_Box",
+                "description": "Gift packaging included – Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Health & Wellness",
+        "attributes": [
+            {
+                "name": "Product_Type",
+                "description": "Essential Oil/Balm/Supplement/Vitamins/First Aid/Gel/Diffuser/Body Wash"
+            },
+            {
+                "name": "Volume_ml_or_Weight_g",
+                "description": "Net volume or weight"
+            },
+            {
+                "name": "Key_Ingredients",
+                "description": "Active or primary ingredients (e.g. Eucalyptus, Citronella, Vitamin C)"
+            },
+            {
+                "name": "Usage_Purpose",
+                "description": "Air Purifying/Respiratory/Relaxation/Baby Care/Pain Relief/Immunity"
+            },
+            {
+                "name": "Form",
+                "description": "Oil/Balm/Gel/Spray/Tablet/Capsule/Gummy/Powder"
+            },
+            {
+                "name": "Suitable_For",
+                "description": "Adults/Baby/Children/Elderly/Pregnant Women"
+            },
+            {
+                "name": "Dietary_Attributes",
+                "description": "Vegan/Natural/Organic/Gluten-Free/Halal"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country of manufacture"
+            },
+            {
+                "name": "Shelf_life",
+                "description": "Shelf life in months"
+            }
+        ]
+    },
+    {
+        "main_category": "Savoury & Sweet Snacks",
+        "attributes": [
+            {
+                "name": "Snack_Type",
+                "description": "Dates/Nuts/Chips/Crackers/Popcorn/Dried Fruit/Trail Mix/Cookies/Pretzels"
+            },
+            {
+                "name": "Weight_g",
+                "description": "Net weight in grams"
+            },
+            {
+                "name": "Flavor",
+                "description": "Flavor variant (e.g. Plain, Salted, Spiced, BBQ, Sweet)"
+            },
+            {
+                "name": "Allergens",
+                "description": "Allergen information (nuts, dairy, gluten, soy)"
+            },
+            {
+                "name": "Dietary_Attributes",
+                "description": "Organic/Vegan/Gluten-Free/Halal/Natural/Kosher"
+            },
+            {
+                "name": "Packaging_Type",
+                "description": "Pack/Tray/Box/Bag/Can/Tube"
+            },
+            {
+                "name": "Taste_Profile",
+                "description": "Salty/Sweet/Spicy/Smoky/Sour"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country of production"
+            },
+            {
+                "name": "Shelf_life",
+                "description": "Shelf life in months"
+            }
+        ]
+    },
+    {
+        "main_category": "Heated Tobacco & Vaping",
+        "attributes": [
+            {
+                "name": "Product_Type",
+                "description": "Disposable E-Cigarette/Heated Tobacco Device/Heated Stick/Vape Pod/Vape Liquid"
+            },
+            {
+                "name": "Nicotine_Content_mg",
+                "description": "Nicotine content in mg or mg/ml"
+            },
+            {
+                "name": "Flavor",
+                "description": "Classic/Menthol/Cherry/Fruit/Tobacco"
+            },
+            {
+                "name": "Puff_Count",
+                "description": "Estimated number of puffs (for disposables)"
+            },
+            {
+                "name": "Compatible_Device",
+                "description": "Compatible device model (for sticks/pods)"
+            },
+            {
+                "name": "Battery_Capacity_mAh",
+                "description": "Battery capacity in mAh (for devices)"
+            },
+            {
+                "name": "Tobacco_Free",
+                "description": "Yes/No"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country of manufacture"
+            },
+            {
+                "name": "Rechargeable",
+                "description": "Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Home Fragrance",
+        "attributes": [
+            {
+                "name": "Product_Type",
+                "description": "Candle/Reed Diffuser/Room Spray/Wax Melt/Incense/Plug-In"
+            },
+            {
+                "name": "Volume_ml_or_Weight_g",
+                "description": "Net volume or weight"
+            },
+            {
+                "name": "Fragrance_Name",
+                "description": "Scent name or description"
+            },
+            {
+                "name": "Fragrance_Family",
+                "description": "Floral/Woody/Fresh/Citrus/Oriental/Gourmand/Spicy"
+            },
+            {
+                "name": "Burn_Time_hrs",
+                "description": "Estimated burn time in hours (for candles)"
+            },
+            {
+                "name": "Wax_Type",
+                "description": "Soy/Paraffin/Beeswax/Coconut (for candles)"
+            },
+            {
+                "name": "Dimensions_cm",
+                "description": "Product dimensions"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country of manufacture"
+            },
+            {
+                "name": "Gift_Box",
+                "description": "Gift packaging included – Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Home Décor & Lifestyle",
+        "attributes": [
+            {
+                "name": "Product_Type",
+                "description": "Picture Frame/Vase/Cushion/Clock/Ornament/Tray/Photo Album/Coaster"
+            },
+            {
+                "name": "Material",
+                "description": "Primary material (Glass/Ceramic/Metal/Wood/Fabric/Resin)"
+            },
+            {
+                "name": "Dimensions_cm",
+                "description": "Product dimensions (H x W x D)"
+            },
+            {
+                "name": "Color",
+                "description": "Primary color"
+            },
+            {
+                "name": "Style",
+                "description": "Modern/Traditional/Minimalist/Boho/Nordic/Vintage"
+            },
+            {
+                "name": "Handmade",
+                "description": "Yes/No"
+            },
+            {
+                "name": "Care_Instructions",
+                "description": "Cleaning and care guidance"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country of manufacture"
+            },
+            {
+                "name": "Gift_Box",
+                "description": "Gift packaging included – Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Jewellery",
+        "attributes": [
+            {
+                "name": "Jewellery_Type",
+                "description": "Necklace/Earrings/Ring/Bracelet/Pendant/Brooch/Anklet"
+            },
+            {
+                "name": "Material",
+                "description": "Base Metal/Alloy/Gold/Silver/Rose Gold/Stainless Steel/Platinum"
+            },
+            {
+                "name": "Gemstone_Crystal",
+                "description": "Crystal/Amethyst/Zircon/Pearl/Diamond/Sapphire/None"
+            },
+            {
+                "name": "Color_Plating",
+                "description": "Gold-plated/Silver/Rose Gold/Rhodium/Natural"
+            },
+            {
+                "name": "Design_Theme",
+                "description": "Design motif (e.g. Circle/Butterfly/Art Deco/Floral/Geometric)"
+            },
+            {
+                "name": "Gender",
+                "description": "Women/Men/Unisex"
+            },
+            {
+                "name": "Closure_Type",
+                "description": "Lobster Clasp/Hook/Push-Back/Toggle/Screw-Back"
+            },
+            {
+                "name": "Dimensions_mm",
+                "description": "Size or diameter in mm"
+            },
+            {
+                "name": "Gift_Box",
+                "description": "Gift packaging included – Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Local Food & Confectionery",
+        "attributes": [
+            {
+                "name": "Product_Type",
+                "description": "Dates/Spice/Cookies/Milk Powder/Preserve/Sauce/Biscuit/Dried Snack"
+            },
+            {
+                "name": "Weight_g_or_Volume_ml",
+                "description": "Net weight or volume"
+            },
+            {
+                "name": "Variant_or_Grade",
+                "description": "Variant or grade (e.g. Grade A, Ground, Sticks, Whole)"
+            },
+            {
+                "name": "Main_Ingredients",
+                "description": "Key ingredients"
+            },
+            {
+                "name": "Allergens",
+                "description": "Allergen information"
+            },
+            {
+                "name": "Dietary_Attributes",
+                "description": "Vegan/Vegetarian/Gluten-Free/Halal/Organic"
+            },
+            {
+                "name": "Regional_Origin",
+                "description": "Region or country of origin"
+            },
+            {
+                "name": "Packaging_Type",
+                "description": "Pack/Tin/Tray/Bag/Jar"
+            },
+            {
+                "name": "Shelf_life",
+                "description": "Shelf life in months"
+            }
+        ]
+    },
+    {
+        "main_category": "Loose & Pipe Tobacco",
+        "attributes": [
+            {
+                "name": "Product_Type",
+                "description": "Rolling Tobacco/Pipe Tobacco/Hand Rolling"
+            },
+            {
+                "name": "Weight_g",
+                "description": "Net weight in grams"
+            },
+            {
+                "name": "Tobacco_Blend",
+                "description": "Virginia/Burley/Oriental/Latakia/Blend"
+            },
+            {
+                "name": "Flavor_Aroma",
+                "description": "Natural/Original/Vanilla/Cherry/Menthol"
+            },
+            {
+                "name": "Cut_Type",
+                "description": "Ready Rubbed/Flake/Ribbon/Plug/Crumble Cake"
+            },
+            {
+                "name": "Strength",
+                "description": "Mild/Medium/Full"
+            },
+            {
+                "name": "Packaging_Type",
+                "description": "Pouch/Tin/Bag"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country of manufacture"
+            },
+            {
+                "name": "Nicotine_Content",
+                "description": "Nicotine content in % or mg/g (if stated)"
+            }
+        ]
+    },
+    {
+        "main_category": "Makeup",
+        "attributes": [
+            {
+                "name": "Product_Type",
+                "description": "Mascara/Foundation/Lipstick/Brow/Eyeshadow/Blush/Concealer/Highlighter/Set"
+            },
+            {
+                "name": "Shade_Color",
+                "description": "Shade name or color code (e.g. Power Blue, Rebel Brown)"
+            },
+            {
+                "name": "Finish",
+                "description": "Matte/Glossy/Satin/Shimmer/Natural"
+            },
+            {
+                "name": "Weight_g_or_Volume_ml",
+                "description": "Net weight or volume"
+            },
+            {
+                "name": "Skin_Type",
+                "description": "Normal/Oily/Dry/Combination/All Skin Types"
+            },
+            {
+                "name": "Key_Ingredients",
+                "description": "Active or featured ingredients"
+            },
+            {
+                "name": "Format",
+                "description": "Full Size/Mini/Duo/Set"
+            },
+            {
+                "name": "Cruelty_Free",
+                "description": "Yes/No"
+            },
+            {
+                "name": "SPF",
+                "description": "SPF level if included"
+            }
+        ]
+    },
+    {
+        "main_category": "Seasonal & Festival",
+        "attributes": [
+            {
+                "name": "Product_Type",
+                "description": "Decoration/Gift/Ornament/Advent Calendar/Hamper/Greeting Card"
+            },
+            {
+                "name": "Festival_Occasion",
+                "description": "Christmas/Eid/Diwali/Chinese New Year/Halloween/Easter/Valentine's/Ramadan"
+            },
+            {
+                "name": "Material",
+                "description": "Primary material (Fabric/Paper/Plastic/Metal/Wood/Ceramic)"
+            },
+            {
+                "name": "Dimensions_cm",
+                "description": "Product dimensions"
+            },
+            {
+                "name": "Color",
+                "description": "Primary color(s)"
+            },
+            {
+                "name": "Handmade",
+                "description": "Yes/No"
+            },
+            {
+                "name": "Reusable",
+                "description": "Yes/No"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country of manufacture"
+            },
+            {
+                "name": "Gift_Box",
+                "description": "Gift packaging included – Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Shisha & Hookah",
+        "attributes": [
+            {
+                "name": "Product_Type",
+                "description": "Shisha Tobacco/Hookah Device/Charcoal/Accessory"
+            },
+            {
+                "name": "Weight_g",
+                "description": "Net weight in grams (e.g. 50g/500g/1kg)"
+            },
+            {
+                "name": "Flavor",
+                "description": "Flavor variant (e.g. Grape/Grape with Mint/Watermelon/Apple)"
+            },
+            {
+                "name": "Nicotine_Content",
+                "description": "Nicotine % or Nicotine-Free"
+            },
+            {
+                "name": "Tobacco_Free",
+                "description": "Yes/No"
+            },
+            {
+                "name": "Sessions_Per_Pack",
+                "description": "Estimated number of sessions per pack"
+            },
+            {
+                "name": "Packaging_Type",
+                "description": "Bag/Tin/Box"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country of manufacture"
+            },
+            {
+                "name": "Hose_Included",
+                "description": "Yes/No (for hookah devices)"
+            }
+        ]
+    },
+    {
+        "main_category": "Smokeless Tobacco & Snus",
+        "attributes": [
+            {
+                "name": "Product_Type",
+                "description": "Snus/Nicotine Pouch/Chewing Tobacco/Snuff/Dip"
+            },
+            {
+                "name": "Weight_g",
+                "description": "Net weight in grams"
+            },
+            {
+                "name": "Nicotine_Content_mg_per_g",
+                "description": "Nicotine content in mg per gram"
+            },
+            {
+                "name": "Flavor",
+                "description": "Flavor variant (Mint/Original/Citrus/Berry/Wintergreen)"
+            },
+            {
+                "name": "Format",
+                "description": "Loose/Portion/Mini Portion/Slim Portion"
+            },
+            {
+                "name": "Tobacco_Free",
+                "description": "Yes/No – nicotine pouch vs tobacco-based"
+            },
+            {
+                "name": "Moisture_Level",
+                "description": "Dry/Original/Moist (for portions)"
+            },
+            {
+                "name": "Portion_Count",
+                "description": "Number of portions per pack"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country of manufacture"
+            }
+        ]
+    },
+    {
+        "main_category": "Smoking Accessories",
+        "attributes": [
+            {
+                "name": "Accessory_Type",
+                "description": "Lighter/Ashtray/Pipe/Rolling Paper/Filter/Cigarette Case/Cutter/Matches"
+            },
+            {
+                "name": "Material",
+                "description": "Primary material (Metal/Plastic/Leather/Wood/Ceramic)"
+            },
+            {
+                "name": "Color",
+                "description": "Primary color"
+            },
+            {
+                "name": "Fuel_Type",
+                "description": "Butane/Petrol/Electric/Flameless (for lighters)"
+            },
+            {
+                "name": "Dimensions_cm",
+                "description": "Product dimensions"
+            },
+            {
+                "name": "Refillable",
+                "description": "Yes/No (for lighters)"
+            },
+            {
+                "name": "Pack_Quantity",
+                "description": "Number of units per pack (for papers/filters)"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country of manufacture"
+            },
+            {
+                "name": "Gift_Box",
+                "description": "Gift packaging included – Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Stationery & Gifts",
+        "attributes": [
+            {
+                "name": "Product_Type",
+                "description": "Pen Pouch/Pen Sleeve/Notebook/Planner/Card Holder/Document Case/Diary/Gift Set"
+            },
+            {
+                "name": "Material",
+                "description": "Primary material (Leather/Fabric/Crocodile Print/Paper/Synthetic)"
+            },
+            {
+                "name": "Color",
+                "description": "Primary color (e.g. Black, British Green, Ink Blue, Cassis)"
+            },
+            {
+                "name": "Dimensions_cm",
+                "description": "Product dimensions"
+            },
+            {
+                "name": "Capacity",
+                "description": "Pen capacity or page count (e.g. 1-Pen/2-Pen/200 pages)"
+            },
+            {
+                "name": "Closure_Type",
+                "description": "Zip/Snap/Magnetic/Open/Elastic"
+            },
+            {
+                "name": "Collection_Series",
+                "description": "Collection name (e.g. Meisterstuck, Extreme 3.0)"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country of manufacture"
+            },
+            {
+                "name": "Gift_Box",
+                "description": "Gift packaging included – Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Toys, Games & Plush",
+        "attributes": [
+            {
+                "name": "Product_Type",
+                "description": "Plush Toy/Board Game/Puzzle/Action Figure/Card Game/Educational Toy"
+            },
+            {
+                "name": "Character_Theme",
+                "description": "Character or animal theme (e.g. Penguin/Bear/Snow Leopard/Alligator)"
+            },
+            {
+                "name": "Size_Inches",
+                "description": "Size in inches (e.g. 5 Inch/10 Inch/13 Inch)"
+            },
+            {
+                "name": "Material",
+                "description": "Primary material (Plush/Plastic/Wood/Fabric/Cardboard)"
+            },
+            {
+                "name": "Age_Range",
+                "description": "Recommended age group (e.g. 3+/6-12 years/All Ages)"
+            },
+            {
+                "name": "Safety_Standard",
+                "description": "CE/ASTM/EN71 safety certification"
+            },
+            {
+                "name": "Washable",
+                "description": "Yes/No (for plush toys)"
+            },
+            {
+                "name": "Batteries_Required",
+                "description": "Yes/No – battery type if applicable"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Country of manufacture"
+            }
+        ]
+    },
+    {
+        "main_category": "Watches",
+        "attributes": [
+            {
+                "name": "Gender",
+                "description": "Men/Women/Unisex"
+            },
+            {
+                "name": "Movement_Type",
+                "description": "Analog/Digital/Analog-Digital/Automatic/Chronograph/Quartz/Solar"
+            },
+            {
+                "name": "Case_Material",
+                "description": "Stainless Steel/Titanium/Gold-tone/Rose Gold/Gunmetal/Ceramic"
+            },
+            {
+                "name": "Strap_Material",
+                "description": "Silicone/Leather/Stainless Steel/Fabric/Rubber"
+            },
+            {
+                "name": "Case_Diameter_mm",
+                "description": "Case diameter in millimeters"
+            },
+            {
+                "name": "Color_Dial",
+                "description": "Dial color (e.g. Black, Silver, Blue, Multicolor)"
+            },
+            {
+                "name": "Water_Resistance_ATM",
+                "description": "Water resistance rating in ATM"
+            },
+            {
+                "name": "Model_Reference",
+                "description": "Manufacturer model/reference number"
+            },
+            {
+                "name": "Gift_Box",
+                "description": "Gift packaging included – Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Writing Instruments",
+        "attributes": [
+            {
+                "name": "Product_Type",
+                "description": "Fountain Pen/Ballpoint Pen/Rollerball/Pencil/Ink Bottle/Ink Cartridge/Pen Set/Refill"
+            },
+            {
+                "name": "Material",
+                "description": "Body material (Resin/Metal/Lacquered/Leather-clad)"
+            },
+            {
+                "name": "Season_Collection",
+                "description": "Season collection of the particular product when it was released"
+            },
+            {
+                "name": "Color",
+                "description": "Body or ink color (e.g. Black/Mystery Black/Royal Blue/Amethyst Purple)"
+            },
+            {
+                "name": "Nib_Size",
+                "description": "EF/F/M/B/BB (Extra Fine to Double Broad)"
+            },
+            {
+                "name": "Ink_Volume_ml",
+                "description": "Ink volume in ml (for ink bottles e.g. 50ml/60ml)"
+            },
+            {
+                "name": "Collection_Series",
+                "description": "Collection name (e.g. Meisterstuck/Starwalker/Heritage)"
+            },
+            {
+                "name": "Refillable",
+                "description": "Yes/No"
+            },
+            {
+                "name": "Gift_Box",
+                "description": "Comes with gift box/case – Yes/No"
+            }
+        ]
+    },
+    {
+        "main_category": "Footwear",
+        "attributes": [
+            {
+                "name": "Footwear_Type",
+                "description": "Sneakers/Sandals/Loafers/Heels/Boots/Flip Flops/Formal Shoes/Sports Shoes"
+            },
+            {
+                "name": "Gender",
+                "description": "Men/Women/Unisex/Kids"
+            },
+            {
+                "name": "Size",
+                "description": "EU/UK/US sizing (e.g. EU 40/UK 7/US 8)"
+            },
+            {
+                "name": "Material_Upper",
+                "description": "Upper material (Leather/Suede/Canvas/Synthetic/Mesh)"
+            },
+            {
+                "name": "Color",
+                "description": "Primary color"
+            },
+            {
+                "name": "Sole_Material",
+                "description": "Sole material (Rubber/Leather/EVA/Synthetic)"
+            },
+            {
+                "name": "Closure_Type",
+                "description": "Lace-up/Slip-on/Buckle/Velcro/Zip"
+            },
+            {
+                "name": "Occasion",
+                "description": "Casual/Formal/Sports/Travel/Beach"
+            },
+            {
+                "name": "Country_of_Origin",
+                "description": "Manufacturing country"
+            }
+        ]
+    }
+]

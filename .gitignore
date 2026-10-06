@@ -1,0 +1,6 @@
+.env
+*.db
+*.xlsx
+__pycache__/
+.log
+*.xlsx#
