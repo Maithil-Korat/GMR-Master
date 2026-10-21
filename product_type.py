@@ -136,7 +136,6 @@ def direct_parallel_classify(rows: list[dict[str, Any]], api: Any) -> dict[int, 
 
 
 def batch_classify(rows: list[dict[str, Any]], api: Any, chunk_size: int = CHUNK_SIZE, poll_seconds: float = 15.0) -> tuple[dict[int, str], str]:
-    """Batch API queue for large datasets (> 200 items)."""
     requests = []
     schema = inline_schema(BatchClassificationResponse)
 

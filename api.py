@@ -46,7 +46,7 @@ StageType = Literal[
 
 class StageRunRequest(BaseModel):
     stage: StageType
-    check_master: bool = True
+    check_master: bool = False
     selected_row_ids: list[str] = PydanticField(default_factory=list)
     operator_hint: str = ""
 
@@ -77,33 +77,73 @@ class JobState:
     status: str = "IDLE"
     active_stage: str = "INGEST"
     progress_percent: int = 100
+    progress_counter: str = ""
     message: str = "Ready"
     error: str = ""
+    error_stage: str = ""
     updated_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    metrics: dict[str, Any] = field(default_factory=dict)
+    checkpoint_data: dict[str, Any] = field(default_factory=dict)
+    batch_job_ids: dict[str, str] = field(default_factory=dict)
 
-    def update(self, status: str, stage: str, progress: int, message: str, error: str = "") -> None:
+    def update(
+        self,
+        status: str,
+        stage: str,
+        progress: int,
+        message: str,
+        error: str = "",
+        progress_counter: str = "",
+        metrics: dict[str, Any] | None = None,
+        checkpoint_data: dict[str, Any] | None = None,
+        batch_job_id: str | None = None,
+    ) -> None:
         self.status = status
         self.active_stage = stage
         self.progress_percent = progress
+        self.progress_counter = progress_counter
         self.message = message
         self.error = error
         self.updated_at = datetime.now(timezone.utc).isoformat()
+        if metrics is not None:
+            self.metrics = metrics
+        if checkpoint_data is not None:
+            self.checkpoint_data = checkpoint_data
+        if batch_job_id is not None:
+            self.batch_job_ids[stage] = batch_job_id
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "status": self.status,
             "active_stage": self.active_stage,
             "progress_percent": self.progress_percent,
+            "progress_counter": self.progress_counter,
             "message": self.message,
             "error": self.error,
+            "error_stage": self.error_stage,
             "updated_at": self.updated_at,
+            "metrics": self.metrics,
+            "checkpoint_data": self.checkpoint_data,
         }
 
 
 class PipelineJobManager:
+    STAGE_WEIGHTS = {
+        "FIELD_MAP": 1, "ITEM_TYPE": 1, "PRODUCT_TYPE": 1,
+        "TITLE": 4, "ATTRIBUTES": 4, "CONTENT": 4, "TAXONOMY": 4,
+        "UNICODE": 1,
+    }
+
     def __init__(self) -> None:
         self._jobs: dict[str, JobState] = {}
+        self._cancelled: set[str] = set()
+        self._plans: dict[str, list[str]] = {}
         self._lock = threading.Lock()
+
+    def begin_plan(self, file_id: str, stages: list[str]) -> None:
+        with self._lock:
+            self._plans[file_id] = stages
+            self._jobs.setdefault(file_id, JobState()).progress_percent = 0
 
     def get(self, file_id: str) -> JobState:
         with self._lock:
@@ -111,15 +151,72 @@ class PipelineJobManager:
                 self._jobs[file_id] = JobState()
             return self._jobs[file_id]
 
-    def set(self, file_id: str, status: str, stage: str, progress: int, message: str, error: str = "") -> None:
+    def set(
+        self,
+        file_id: str,
+        status: str,
+        stage: str,
+        progress: int,
+        message: str,
+        error: str = "",
+        progress_counter: str = "",
+        metrics: dict[str, Any] | None = None,
+        checkpoint_data: dict[str, Any] | None = None,
+        batch_job_id: str | None = None,
+    ) -> None:
         with self._lock:
             if file_id not in self._jobs:
                 self._jobs[file_id] = JobState()
-            self._jobs[file_id].update(status, stage, progress, message, error)
+
+            plan = self._plans.get(file_id)
+            if status == "RUNNING" and plan and stage in plan:
+                w = self.STAGE_WEIGHTS
+                total = sum(w.get(s, 1) for s in plan)
+                start = sum(w.get(s, 1) for s in plan[:plan.index(stage)])
+                local = max(0, min(100, progress)) / 100
+                mapped = int((start + local * w.get(stage, 1)) / total * 100)
+                progress = max(mapped, self._jobs[file_id].progress_percent)
+
+            self._jobs[file_id].update(
+                status, stage, progress, message, error, progress_counter, metrics, checkpoint_data, batch_job_id
+            )
 
     def is_running(self, file_id: str) -> bool:
         with self._lock:
             return self._jobs.get(file_id, JobState()).status == "RUNNING"
+
+    def fail(self, file_id: str, stage: str, message: str) -> None:
+        with self._lock:
+            job = self._jobs.setdefault(file_id, JobState())
+            self._plans.pop(file_id, None)
+            job.status = "ERROR"
+            job.error_stage = stage
+            job.error = message
+            job.message = message
+            job.updated_at = datetime.now(timezone.utc).isoformat()
+
+    def cancel(self, file_id: str) -> bool:
+        with self._lock:
+            job = self._jobs.get(file_id)
+            if job and job.status == "RUNNING":
+                self._cancelled.add(file_id)
+                return True
+            return False
+
+    def is_cancelled(self, file_id: str) -> bool:
+        with self._lock:
+            return file_id in self._cancelled
+
+    def clear_cancel(self, file_id: str) -> None:
+        with self._lock:
+            self._cancelled.discard(file_id)
+
+    def get_batch_job_id(self, file_id: str, stage: str) -> str | None:
+        with self._lock:
+            job = self._jobs.get(file_id)
+            if job:
+                return job.batch_job_ids.get(stage)
+            return None
 
 
 class RowQueryService:
@@ -251,44 +348,64 @@ class PipelineWorker:
     def __init__(self, manager: PipelineJobManager) -> None:
         self.manager = manager
 
+    def _compute_metrics(self, file_id: str) -> dict[str, Any]:
+        rows = database.rows(file_id)
+        return RowQueryService.get_metrics(rows)
+
     def run(self, file_id: str, req: StageRunRequest) -> None:
+        row_ids = req.selected_row_ids if req.selected_row_ids else None
+        steps = {
+            "FIELD_MAP": ("Mapping semantic fields...", lambda: context.prepare(file_id)),
+            "ITEM_TYPE": ("Classifying item types...", lambda: item_type.classify_file(file_id)),
+            "PRODUCT_TYPE": ("Classifying product categories...", lambda: product_type.classify_file(file_id)),
+            "TITLE": ("Generating cleaned titles...", lambda: title.run(file_id, row_ids=row_ids, job_manager=self.manager)),
+            "ATTRIBUTES": ("Extracting attributes...", lambda: attribute.run(file_id, row_ids=row_ids, job_manager=self.manager)),
+            "CONTENT": ("Generating commercial content...", lambda: content.run(file_id, row_ids=row_ids, job_manager=self.manager)),
+            "TAXONOMY": ("Resolving GMR taxonomy...", lambda: taxonomy_v2.run(file_id, row_ids=row_ids, job_manager=self.manager)),
+            "UNICODE": ("Reconciling item numbers...", lambda: item_number.assign_unicodes(file_id, check_master=req.check_master)),
+        }
+        plan = list(steps) if req.stage == "AUTO_PILOT" else [req.stage]
+        current = plan[0]
+        completed: list[str] = []
+
         try:
-            self.manager.set(file_id, "RUNNING", req.stage, 5, f"Initializing {req.stage}...")
-            row_ids = req.selected_row_ids if req.selected_row_ids else None
+            self.manager.clear_cancel(file_id)
 
-            if req.stage == "AUTO_PILOT":
-                steps = [
-                    ("FIELD_MAP", 10, "Mapping semantic fields...", lambda: context.prepare(file_id)),
-                    ("ITEM_TYPE", 22, "Classifying item types...", lambda: item_type.classify_file(file_id)),
-                    ("PRODUCT_TYPE", 35, "Classifying product categories...", lambda: product_type.classify_file(file_id)),
-                    ("TITLE", 48, "Generating cleaned titles...", lambda: title.run(file_id, row_ids=row_ids)),
-                    ("ATTRIBUTES", 62, "Extracting attributes...", lambda: attribute.run(file_id, row_ids=row_ids)),
-                    ("CONTENT", 75, "Generating commercial content...", lambda: content.run(file_id, row_ids=row_ids)),
-                    ("TAXONOMY", 88, "Resolving GMR taxonomy...", lambda: taxonomy_v2.run(file_id, row_ids=row_ids)),
-                    ("UNICODE", 96, "Reconciling item numbers...", lambda: item_number.assign_unicodes(file_id, check_master=req.check_master)),
-                ]
-                for st_name, progress, msg, action in steps:
-                    self.manager.set(file_id, "RUNNING", st_name, progress, msg)
-                    action()
-            else:
-                dispatch = {
-                    "FIELD_MAP": (30, "Mapping semantic fields...", lambda: context.prepare(file_id)),
-                    "ITEM_TYPE": (40, "Classifying item types...", lambda: item_type.classify_file(file_id)),
-                    "PRODUCT_TYPE": (50, "Classifying product categories...", lambda: product_type.classify_file(file_id)),
-                    "TITLE": (60, "Auditing cleaned titles...", lambda: title.run(file_id, row_ids=row_ids)),
-                    "ATTRIBUTES": (70, "Auditing attributes...", lambda: attribute.run(file_id, row_ids=row_ids)),
-                    "CONTENT": (80, "Auditing commercial content...", lambda: content.run(file_id, row_ids=row_ids)),
-                    "TAXONOMY": (88, "Auditing taxonomy paths...", lambda: taxonomy_v2.run(file_id, row_ids=row_ids)),
-                    "UNICODE": (95, "Allocating item numbers...", lambda: item_number.assign_unicodes(file_id, check_master=req.check_master)),
-                }
-                progress, msg, action = dispatch[req.stage]
-                self.manager.set(file_id, "RUNNING", req.stage, progress, msg)
+            initial_metrics = self._compute_metrics(file_id)
+            total_rows = initial_metrics.get("total", 0)
+            self.manager.set(
+                file_id, "RUNNING", req.stage, 5,
+                f"Initializing {req.stage}...",
+                progress_counter=f"0/{total_rows}",
+                metrics=initial_metrics,
+            )
+
+            self.manager.begin_plan(file_id, plan)
+
+            for st_name in plan:
+                current = st_name
+                if self.manager.is_cancelled(file_id):
+                    self.manager.set(file_id, "CANCELLED", st_name, 0, "Job cancelled by user")
+                    return
+                msg, action = steps[st_name]
+                self.manager.set(file_id, "RUNNING", st_name, 0, msg)
                 action()
+                completed.append(st_name)
 
-            self.manager.set(file_id, "COMPLETED", req.stage, 100, f"{req.stage} completed successfully.")
+            final_metrics = self._compute_metrics(file_id)
+            self.manager.set(
+                file_id, "COMPLETED", req.stage, 100,
+                f"{req.stage} completed successfully.",
+                metrics=final_metrics,
+            )
         except Exception as exc:
-            logger.event("API_PIPELINE_ERROR", "failure", file_id=file_id, error=str(exc))
-            self.manager.set(file_id, "ERROR", req.stage, 0, str(exc), error=str(exc))
+            note = f" Completed: {', '.join(completed)}." if completed else ""
+            message = f"{current} failed — {type(exc).__name__}: {exc}.{note}"
+            logger.event(
+                "API_PIPELINE_ERROR", "failure",
+                file_id=file_id, stage=current, error_type=type(exc).__name__, error=str(exc),
+            )
+            self.manager.fail(file_id, current, message)
 
 
 job_manager = PipelineJobManager()
@@ -351,7 +468,6 @@ async def paste_catalog_text(req: PasteIngestRequest):
     
 @app.post("/api/files/{file_id}/sync-excel")
 async def sync_excel_edits(file_id: str, file: UploadFile = File(...)):
-    """Bulk-synchronizes all edited columns from Excel back into SQLite."""
     suffix = Path(file.filename or "").suffix.lower()
     if suffix not in {".xlsx", ".xls", ".xlsb"}:
         raise HTTPException(status_code=400, detail="Only Excel files (.xlsx, .xls, .xlsb) are supported.")
@@ -522,16 +638,26 @@ async def sync_excel_edits(file_id: str, file: UploadFile = File(...)):
 
 @app.get("/api/files/{file_id}/status")
 async def get_status(file_id: str) -> dict[str, Any]:
-    rows = await asyncio.to_thread(database.rows, file_id)
-    if not rows:
-        raise HTTPException(status_code=404, detail="File ID not found.")
-
     job = job_manager.get(file_id)
-    metrics = RowQueryService.get_metrics(rows)
+    
+    if job.status == "IDLE" and not job.metrics:
+        rows = await asyncio.to_thread(database.rows, file_id)
+        if not rows:
+            raise HTTPException(status_code=404, detail="File ID not found.")
+        metrics = RowQueryService.get_metrics(rows)
+        job_manager.set(file_id, "IDLE", job.active_stage, job.progress_percent, job.message, metrics=metrics)
+        job = job_manager.get(file_id)
+    elif not job.metrics:
+        rows = await asyncio.to_thread(database.rows, file_id)
+        if not rows:
+            raise HTTPException(status_code=404, detail="File ID not found.")
+        metrics = RowQueryService.get_metrics(rows)
+        job.metrics = metrics
+    
     return {
         "file_id": file_id,
         "job": job.to_dict(),
-        "metrics": metrics,
+        "metrics": job.metrics,
     }
 
 
@@ -568,11 +694,35 @@ async def run_stage(file_id: str, req: StageRunRequest, bg_tasks: BackgroundTask
     if not rows:
         raise HTTPException(status_code=404, detail="File ID not found.")
 
-    # Synchronously set RUNNING state BEFORE returning 202 to eliminate the race window
     job_manager.set(file_id, "RUNNING", req.stage, 5, f"Initializing {req.stage}...")
 
     bg_tasks.add_task(worker.run, file_id, req)
     return {"message": f"Stage {req.stage} initiated.", "file_id": file_id}
+
+
+@app.post("/api/files/{file_id}/cancel")
+async def cancel_job(file_id: str) -> dict[str, Any]:
+    if not job_manager.is_running(file_id):
+        raise HTTPException(status_code=400, detail="No running job to cancel.")
+    
+    job = job_manager.get(file_id)
+    batch_job_id = job_manager.get_batch_job_id(file_id, job.active_stage)
+    
+    if batch_job_id and batch_job_id != "direct-execution":
+        try:
+            key = os.environ.get("GEMINI_API_KEY", "").strip()
+            if key:
+                from google import genai
+                client = genai.Client(api_key=key)
+                client.batches.cancel(name=batch_job_id)
+                logger.event("API_CANCEL", "batch_cancelled", file_id=file_id, batch_id=batch_job_id)
+        except Exception as e:
+            logger.event("API_CANCEL", "batch_cancel_failed", file_id=file_id, error=str(e))
+    
+    job_manager.cancel(file_id)
+    job_manager.set(file_id, "CANCELLED", job.active_stage, job.progress_percent, "Job cancelled by user")
+    
+    return {"message": "Job cancelled.", "file_id": file_id, "stage": job.active_stage}
 
 
 @app.patch("/api/files/{file_id}/rows/{row_id}")
@@ -657,35 +807,56 @@ async def smart_propagate(file_id: str, req: SmartPropagateRequest) -> dict[str,
     return {"message": f"Applied change to {count} matching products.", "affected_count": count}
 
 
+class BulkUnlinkRequest(BaseModel):
+    row_ids: list[str]
+
+
+def _allocate_unlinks(file_id: str, row_ids: list[str], duplicates_only: bool) -> dict[str, str]:
+    targets = {r["Sr. no."]: r for r in database.rows(file_id) if r["Sr. no."] in set(row_ids)}
+    counters = database.get_live_sequences(file_id)
+    allocations: list[dict[str, Any]] = []
+    result: dict[str, str] = {}
+
+    for rid in row_ids:
+        row = targets.get(rid)
+        base_code = str((row or {}).get("2 Digit Base Code") or "").strip()
+        is_dup = (row or {}).get("item_number_source") == "INTRA_FILE_REUSE"
+
+        if row is None or len(base_code) != 4 or (duplicates_only and not is_dup):
+            if duplicates_only:
+                continue
+            if row is None:
+                raise HTTPException(status_code=404, detail=f"Row {rid} not found.")
+            raise HTTPException(status_code=400, detail=f"Row {rid} has no valid 4-digit base code.")
+
+        counters[base_code] = counters.get(base_code, 0) + 1
+        item_no = f"{base_code}{counters[base_code]:06d}"
+        result[rid] = item_no
+        allocations.append({
+            "row_id": rid,
+            "item_number": item_no,
+            "item_number_source": "NEW_ALLOCATION",
+            "matched_master_title": str(row.get("Title Pass 2") or row.get("Title Pass 1") or "").strip(),
+        })
+
+    if allocations:
+        item_number.persist_allocations(file_id, allocations)
+    return result
+
+
 @app.post("/api/files/{file_id}/unlink-duplicate/{row_id}")
 async def unlink_duplicate(file_id: str, row_id: str) -> dict[str, str]:
-    def _unlink() -> str:
-        rows = database.rows(file_id)
-        target = next((r for r in rows if r["Sr. no."] == row_id), None)
-        if not target:
-            raise HTTPException(status_code=404, detail="Row not found.")
-
-        base_code = str(target.get("2 Digit Base Code") or "").strip()
-        if not base_code or len(base_code) != 4:
-            raise HTTPException(status_code=400, detail="Cannot unlink row without a valid 4-digit base code.")
-
-        counters = database.get_max_sequences()
-        new_seq = counters.get(base_code, 0) + 1
-        new_item_no = f"{base_code}{new_seq:06d}"
-
-        with database.connect() as conn:
-            conn.execute(
-                """
-                UPDATE raw_rows 
-                SET item_number = ?, item_number_source = 'NEW_ALLOCATION' 
-                WHERE file_id = ? AND sr_no = ?
-                """,
-                (new_item_no, file_id, row_id)
-            )
-        return new_item_no
-
-    item_no = await asyncio.to_thread(_unlink)
+    allocations = await asyncio.to_thread(_allocate_unlinks, file_id, [row_id], False)
+    item_no = allocations[row_id]
     return {"message": f"Unlinked duplicate. New Item Number: {item_no}", "item_number": item_no}
+
+
+@app.post("/api/files/{file_id}/unlink-duplicates")
+async def unlink_duplicates(file_id: str, req: BulkUnlinkRequest) -> dict[str, Any]:
+    allocations = await asyncio.to_thread(_allocate_unlinks, file_id, req.row_ids, True)
+    if not allocations:
+        raise HTTPException(status_code=400, detail="No duplicate rows to unlink in selection.")
+    return {"message": f"Unlinked {len(allocations)} duplicates with new item numbers.", "allocations": allocations}
 
 
 @app.post("/api/files/{file_id}/undo")

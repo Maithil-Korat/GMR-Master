@@ -670,6 +670,31 @@ def get_max_sequences() -> dict[str, int]:
     return counters
 
 
+def get_live_sequences(file_id: str) -> dict[str, int]:
+    counters = get_max_sequences()
+
+    with connect() as connection:
+        records = connection.execute(
+            """
+            SELECT base_code_2digit AS prefix, item_number
+            FROM raw_rows
+            WHERE file_id = ? AND LENGTH(item_number) = 10
+            """,
+            (file_id,),
+        ).fetchall()
+
+    for r in records:
+        prefix = str(r["prefix"]).strip()
+        num_str = str(r["item_number"]).strip()
+        if num_str.startswith(prefix):
+            try:
+                seq = int(num_str[len(prefix):])
+                counters[prefix] = max(counters.get(prefix, 0), seq)
+            except ValueError:
+                continue
+    return counters
+
+
 def update_item_numbers(
     file_id: str,
     allocations: Iterable[dict[str, Any]],

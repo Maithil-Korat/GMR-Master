@@ -22,3 +22,130 @@
 2026-10-06 11:17:22,676 | INFO | stage=EXPORT event=completed path=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_34cdb50d.xlsx
 2026-10-06 11:20:29,023 | INFO | stage=EXPORT event=start file_id=34cdb50d352e468eaa0dc7e14d860852 rows=71 target=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_34cdb50d.xlsx
 2026-10-06 11:20:29,225 | INFO | stage=EXPORT event=completed path=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_34cdb50d.xlsx
+2026-10-06 17:10:43,226 | INFO | stage=PRODUCT_TYPE event=file_loaded file_id=51e02a7acfad441585c2daddd6a69331 rows=185
+2026-10-06 17:10:55,436 | INFO | stage=PRODUCT_TYPE event=stored file_id=51e02a7acfad441585c2daddd6a69331 rows=185 batch_id=direct-execution
+2026-10-06 17:10:57,726 | INFO | stage=TITLE event=start file_id=51e02a7acfad441585c2daddd6a69331 rows=185
+2026-10-06 17:11:30,327 | INFO | stage=TITLE event=pass1_stored file_id=51e02a7acfad441585c2daddd6a69331 rows=185
+2026-10-06 17:12:19,178 | INFO | stage=TITLE event=pass2_stored file_id=51e02a7acfad441585c2daddd6a69331 rows=185
+2026-10-06 17:19:54,076 | INFO | stage=TAXONOMY event=start file_id=51e02a7acfad441585c2daddd6a69331 rows=185
+2026-10-06 17:22:16,093 | INFO | stage=TAXONOMY event=pass1_stored file_id=51e02a7acfad441585c2daddd6a69331 rows=185
+2026-10-06 17:23:20,927 | INFO | stage=TAXONOMY event=pass2_stored file_id=51e02a7acfad441585c2daddd6a69331 rows=185
+2026-10-06 17:23:28,112 | INFO | stage=EXPORT event=start file_id=51e02a7acfad441585c2daddd6a69331 rows=185 target=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_51e02a7a.xlsx
+2026-10-06 17:23:28,629 | INFO | stage=EXPORT event=completed path=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_51e02a7a.xlsx
+2026-10-12 15:17:53,054 | INFO | stage=PRODUCT_TYPE event=file_loaded file_id=5f718a9d91ad467b8f311b8ebf00d228 rows=60
+2026-10-12 15:17:57,707 | INFO | stage=PRODUCT_TYPE event=stored file_id=5f718a9d91ad467b8f311b8ebf00d228 rows=60 batch_id=direct-execution
+2026-10-12 15:18:03,403 | INFO | stage=TITLE event=start file_id=5f718a9d91ad467b8f311b8ebf00d228 rows=60
+2026-10-12 15:18:15,123 | INFO | stage=TITLE event=pass1_stored file_id=5f718a9d91ad467b8f311b8ebf00d228 rows=60
+2026-10-12 15:18:39,953 | INFO | stage=TITLE event=pass2_stored file_id=5f718a9d91ad467b8f311b8ebf00d228 rows=60
+2026-10-12 15:23:00,285 | INFO | stage=TAXONOMY event=start file_id=5f718a9d91ad467b8f311b8ebf00d228 rows=60
+2026-10-12 15:26:32,255 | INFO | stage=EXPORT event=start file_id=5f718a9d91ad467b8f311b8ebf00d228 rows=60 target=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_5f718a9d.xlsx
+2026-10-12 15:26:32,538 | INFO | stage=EXPORT event=completed path=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_5f718a9d.xlsx
+2026-10-12 15:27:01,217 | INFO | stage=TAXONOMY event=pass1_stored file_id=5f718a9d91ad467b8f311b8ebf00d228 rows=60
+2026-10-12 15:27:35,218 | INFO | stage=TAXONOMY event=pass2_stored file_id=5f718a9d91ad467b8f311b8ebf00d228 rows=60
+2026-10-12 15:54:24,256 | INFO | stage=PRODUCT_TYPE event=file_loaded file_id=da61741b0b7740898a9198c31d7395b6 rows=3
+2026-10-12 15:54:26,856 | INFO | stage=PRODUCT_TYPE event=stored file_id=da61741b0b7740898a9198c31d7395b6 rows=3 batch_id=direct-execution
+2026-10-12 15:54:30,618 | INFO | stage=TITLE event=start file_id=da61741b0b7740898a9198c31d7395b6 rows=3
+2026-10-12 15:54:33,860 | INFO | stage=TITLE event=pass1_stored file_id=da61741b0b7740898a9198c31d7395b6 rows=3
+2026-10-12 15:54:40,382 | INFO | stage=TITLE event=pass2_stored file_id=da61741b0b7740898a9198c31d7395b6 rows=3
+2026-10-12 15:56:06,987 | INFO | stage=TAXONOMY event=start file_id=da61741b0b7740898a9198c31d7395b6 rows=3
+2026-10-12 15:56:11,816 | INFO | stage=TAXONOMY event=pass1_stored file_id=da61741b0b7740898a9198c31d7395b6 rows=3
+2026-10-12 15:56:19,595 | INFO | stage=TAXONOMY event=pass2_stored file_id=da61741b0b7740898a9198c31d7395b6 rows=3
+2026-10-12 15:56:29,173 | INFO | stage=EXPORT event=start file_id=da61741b0b7740898a9198c31d7395b6 rows=3 target=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_da61741b.xlsx
+2026-10-12 15:56:29,205 | INFO | stage=EXPORT event=completed path=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_da61741b.xlsx
+2026-10-13 11:33:15,620 | INFO | stage=PRODUCT_TYPE event=file_loaded file_id=f553188707a34026b60756d92c2832f5 rows=22
+2026-10-13 11:33:27,749 | INFO | stage=PRODUCT_TYPE event=stored file_id=f553188707a34026b60756d92c2832f5 rows=22 batch_id=direct-execution
+2026-10-13 11:33:31,266 | INFO | stage=TITLE event=start file_id=f553188707a34026b60756d92c2832f5 rows=22
+2026-10-13 11:33:46,080 | INFO | stage=TITLE event=pass1_stored file_id=f553188707a34026b60756d92c2832f5 rows=22
+2026-10-13 11:34:03,077 | INFO | stage=TITLE event=pass2_stored file_id=f553188707a34026b60756d92c2832f5 rows=22
+2026-10-13 11:34:33,764 | INFO | stage=TITLE event=start file_id=f553188707a34026b60756d92c2832f5 rows=1
+2026-10-13 11:34:36,644 | INFO | stage=TITLE event=pass1_stored file_id=f553188707a34026b60756d92c2832f5 rows=1
+2026-10-13 11:34:41,675 | INFO | stage=TITLE event=pass2_stored file_id=f553188707a34026b60756d92c2832f5 rows=1
+2026-10-13 12:14:03,722 | INFO | stage=EXPORT event=start file_id=f553188707a34026b60756d92c2832f5 rows=22 target=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_f5531887.xlsx
+2026-10-13 12:14:03,841 | INFO | stage=EXPORT event=completed path=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_f5531887.xlsx
+2026-10-14 11:09:05,591 | INFO | stage=PRODUCT_TYPE event=file_loaded file_id=edf6573a005447179dd70cd475e9f07f rows=13
+2026-10-14 11:09:09,027 | INFO | stage=PRODUCT_TYPE event=stored file_id=edf6573a005447179dd70cd475e9f07f rows=13 batch_id=direct-execution
+2026-10-14 11:09:43,253 | INFO | stage=TITLE event=start file_id=edf6573a005447179dd70cd475e9f07f rows=13
+2026-10-14 11:09:52,880 | INFO | stage=TITLE event=pass1_stored file_id=edf6573a005447179dd70cd475e9f07f rows=13
+2026-10-14 11:10:08,335 | INFO | stage=TITLE event=pass2_stored file_id=edf6573a005447179dd70cd475e9f07f rows=13
+2026-10-14 11:12:43,394 | INFO | stage=EXPORT event=start file_id=edf6573a005447179dd70cd475e9f07f rows=13 target=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_edf6573a.xlsx
+2026-10-14 11:12:43,437 | INFO | stage=EXPORT event=completed path=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_edf6573a.xlsx
+2026-10-14 11:22:37,500 | INFO | stage=TAXONOMY event=start file_id=edf6573a005447179dd70cd475e9f07f rows=13
+2026-10-14 11:23:10,063 | INFO | stage=TAXONOMY event=pass1_stored file_id=edf6573a005447179dd70cd475e9f07f rows=13
+2026-10-14 11:23:24,400 | INFO | stage=TAXONOMY event=pass2_stored file_id=edf6573a005447179dd70cd475e9f07f rows=13
+2026-10-14 11:25:33,241 | INFO | stage=EXPORT event=start file_id=edf6573a005447179dd70cd475e9f07f rows=13 target=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_edf6573a.xlsx
+2026-10-14 11:25:33,276 | INFO | stage=EXPORT event=completed path=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_edf6573a.xlsx
+2026-10-14 17:31:21,117 | INFO | stage=PRODUCT_TYPE event=file_loaded file_id=6795f4a434e24899b91516bb10269189 rows=38
+2026-10-14 17:31:26,848 | INFO | stage=PRODUCT_TYPE event=stored file_id=6795f4a434e24899b91516bb10269189 rows=38 batch_id=direct-execution
+2026-10-14 17:31:29,468 | INFO | stage=TITLE event=start file_id=6795f4a434e24899b91516bb10269189 rows=38
+2026-10-14 17:31:43,795 | INFO | stage=TITLE event=pass1_stored file_id=6795f4a434e24899b91516bb10269189 rows=38
+2026-10-14 17:32:00,030 | INFO | stage=TITLE event=pass2_stored file_id=6795f4a434e24899b91516bb10269189 rows=38
+2026-10-14 17:34:58,444 | INFO | stage=TAXONOMY event=start file_id=6795f4a434e24899b91516bb10269189 rows=38
+2026-10-14 17:35:34,059 | INFO | stage=TAXONOMY event=pass1_stored file_id=6795f4a434e24899b91516bb10269189 rows=38
+2026-10-14 17:36:00,065 | INFO | stage=TAXONOMY event=pass2_stored file_id=6795f4a434e24899b91516bb10269189 rows=38
+2026-10-14 17:36:23,232 | INFO | stage=API_PIPELINE_ERROR event=failure file_id=6795f4a434e24899b91516bb10269189 error=assign_unicodes() got an unexpected keyword argument 'check_master'
+2026-10-14 17:40:15,211 | INFO | stage=UNICODE event=start file_id=6795f4a434e24899b91516bb10269189 rows=38
+2026-10-14 17:40:28,624 | INFO | stage=UNICODE event=complete file_id=6795f4a434e24899b91516bb10269189 allocated=38
+2026-10-14 17:41:34,089 | INFO | stage=TAXONOMY event=start file_id=6795f4a434e24899b91516bb10269189 rows=38
+2026-10-14 17:42:02,870 | INFO | stage=TAXONOMY event=pass1_stored file_id=6795f4a434e24899b91516bb10269189 rows=38
+2026-10-14 17:42:29,408 | INFO | stage=TAXONOMY event=pass2_stored file_id=6795f4a434e24899b91516bb10269189 rows=38
+2026-10-14 17:42:34,546 | INFO | stage=EXPORT event=start file_id=6795f4a434e24899b91516bb10269189 rows=38 target=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_6795f4a4.xlsx
+2026-10-14 17:42:34,718 | INFO | stage=EXPORT event=completed path=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_6795f4a4.xlsx
+2026-10-15 11:29:50,664 | INFO | stage=API_PIPELINE_ERROR event=failure file_id=d6d6c55d22c748acb4eb6936c2c67969 error=Product Type is required before title generation: ['1', '2', '3', '4', '5', '6']
+2026-10-15 11:29:55,630 | INFO | stage=PRODUCT_TYPE event=file_loaded file_id=d6d6c55d22c748acb4eb6936c2c67969 rows=6
+2026-10-15 11:29:58,050 | INFO | stage=PRODUCT_TYPE event=stored file_id=d6d6c55d22c748acb4eb6936c2c67969 rows=6 batch_id=direct-execution
+2026-10-15 11:30:00,220 | INFO | stage=TITLE event=start file_id=d6d6c55d22c748acb4eb6936c2c67969 rows=6
+2026-10-15 11:30:08,179 | INFO | stage=TITLE event=pass1_stored file_id=d6d6c55d22c748acb4eb6936c2c67969 rows=6
+2026-10-15 11:30:22,729 | INFO | stage=TITLE event=pass2_stored file_id=d6d6c55d22c748acb4eb6936c2c67969 rows=6
+2026-10-15 12:01:52,097 | INFO | stage=FIELD_MAP event=heuristic_complete file_id=d1af875457914312914f0404ccfd9b42 columns=6
+2026-10-15 12:02:02,653 | INFO | stage=PRODUCT_TYPE event=file_loaded file_id=d1af875457914312914f0404ccfd9b42 rows=36
+2026-10-15 12:02:06,334 | INFO | stage=PRODUCT_TYPE event=stored file_id=d1af875457914312914f0404ccfd9b42 rows=36 batch_id=direct-execution
+2026-10-15 12:02:06,338 | INFO | stage=TITLE event=start file_id=d1af875457914312914f0404ccfd9b42 rows=36
+2026-10-15 12:02:17,292 | INFO | stage=TITLE event=pass1_stored file_id=d1af875457914312914f0404ccfd9b42 rows=36
+2026-10-15 12:02:32,748 | INFO | stage=TITLE event=pass2_stored file_id=d1af875457914312914f0404ccfd9b42 rows=36
+2026-10-15 12:04:53,062 | INFO | stage=TAXONOMY event=start file_id=d1af875457914312914f0404ccfd9b42 rows=36
+2026-10-15 12:05:27,933 | INFO | stage=TAXONOMY event=pass1_stored file_id=d1af875457914312914f0404ccfd9b42 rows=36
+2026-10-15 12:05:50,448 | INFO | stage=TAXONOMY event=pass2_stored file_id=d1af875457914312914f0404ccfd9b42 rows=36
+2026-10-15 12:05:50,458 | INFO | stage=UNICODE event=start file_id=d1af875457914312914f0404ccfd9b42 rows=36
+2026-10-15 12:05:56,929 | INFO | stage=UNICODE event=complete file_id=d1af875457914312914f0404ccfd9b42 allocated=36
+2026-10-15 12:21:16,775 | INFO | stage=EXPORT event=start file_id=d1af875457914312914f0404ccfd9b42 rows=36 target=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_d1af8754.xlsx
+2026-10-15 12:21:16,841 | INFO | stage=EXPORT event=completed path=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_d1af8754.xlsx
+2026-10-15 12:44:30,358 | INFO | stage=EXPORT event=start file_id=d1af875457914312914f0404ccfd9b42 rows=36 target=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_d1af8754.xlsx
+2026-10-15 12:44:30,452 | INFO | stage=EXPORT event=completed path=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_d1af8754.xlsx
+2026-10-15 13:26:48,896 | INFO | stage=UNICODE event=start file_id=f1 rows=3 check_master=False
+2026-10-15 13:26:48,960 | INFO | stage=UNICODE event=complete file_id=f1 allocated=3
+2026-10-15 13:26:48,965 | INFO | stage=UNICODE event=start file_id=f1 rows=3 check_master=True
+2026-10-15 13:26:48,970 | INFO | stage=UNICODE event=complete file_id=f1 allocated=3
+2026-10-15 15:32:28,632 | INFO | stage=PRODUCT_TYPE event=file_loaded file_id=c0130210e0f24ed08abbd58cab43fbcc rows=3
+2026-10-15 15:32:39,573 | INFO | stage=PRODUCT_TYPE event=stored file_id=c0130210e0f24ed08abbd58cab43fbcc rows=3 batch_id=direct-execution
+2026-10-15 15:32:42,211 | INFO | stage=TITLE event=start file_id=c0130210e0f24ed08abbd58cab43fbcc rows=3
+2026-10-15 15:32:49,805 | INFO | stage=TITLE event=pass1_stored file_id=c0130210e0f24ed08abbd58cab43fbcc rows=3
+2026-10-15 15:32:55,843 | INFO | stage=TITLE event=pass2_stored file_id=c0130210e0f24ed08abbd58cab43fbcc rows=3
+2026-10-15 15:34:14,277 | INFO | stage=TAXONOMY event=start file_id=c0130210e0f24ed08abbd58cab43fbcc rows=3
+2026-10-15 15:34:27,294 | INFO | stage=TAXONOMY event=pass1_stored file_id=c0130210e0f24ed08abbd58cab43fbcc rows=3
+2026-10-15 15:34:38,039 | INFO | stage=TAXONOMY event=pass2_stored file_id=c0130210e0f24ed08abbd58cab43fbcc rows=3
+2026-10-15 15:34:47,533 | INFO | stage=EXPORT event=start file_id=c0130210e0f24ed08abbd58cab43fbcc rows=3 target=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_c0130210.xlsx
+2026-10-15 15:34:47,622 | INFO | stage=EXPORT event=completed path=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_c0130210.xlsx
+2026-10-15 15:38:59,235 | INFO | stage=EXCEL_SYNC event=completed file_id=c0130210e0f24ed08abbd58cab43fbcc rows=1 fields=['Titles', 'Brand', 'Parent', 'Invoice', 'HSN', 'Country', 'Taxonomy', 'Product Type', 'Item Type', 'Item Numbers']
+2026-10-15 15:52:50,398 | INFO | stage=UNICODE event=start file_id=c0130210e0f24ed08abbd58cab43fbcc rows=3 check_master=False
+2026-10-15 15:53:02,150 | INFO | stage=UNICODE event=complete file_id=c0130210e0f24ed08abbd58cab43fbcc allocated=3
+2026-10-15 22:08:06,148 | INFO | stage=UNICODE event=start file_id=f1 rows=3 check_master=False
+2026-10-15 22:08:06,289 | INFO | stage=UNICODE event=complete file_id=f1 allocated=3
+2026-10-15 22:08:06,303 | INFO | stage=UNICODE event=start file_id=f1 rows=3 check_master=True
+2026-10-15 22:08:06,319 | INFO | stage=UNICODE event=complete file_id=f1 allocated=3
+2026-10-19 14:47:00,249 | INFO | stage=FIELD_MAP event=heuristic_complete file_id=8b4c1cd7ca2e487191804c803966c99a columns=6
+2026-10-19 14:47:49,120 | INFO | stage=PRODUCT_TYPE event=file_loaded file_id=8b4c1cd7ca2e487191804c803966c99a rows=40
+2026-10-19 14:47:54,488 | INFO | stage=PRODUCT_TYPE event=stored file_id=8b4c1cd7ca2e487191804c803966c99a rows=40 batch_id=direct-execution
+2026-10-19 14:48:00,880 | INFO | stage=TITLE event=start file_id=8b4c1cd7ca2e487191804c803966c99a rows=40
+2026-10-19 14:48:12,700 | INFO | stage=TITLE event=pass1_stored file_id=8b4c1cd7ca2e487191804c803966c99a rows=40
+2026-10-19 14:48:29,708 | INFO | stage=TITLE event=pass2_stored file_id=8b4c1cd7ca2e487191804c803966c99a rows=40
+2026-10-19 14:51:26,942 | INFO | stage=TAXONOMY event=start file_id=8b4c1cd7ca2e487191804c803966c99a rows=40
+2026-10-19 14:52:09,053 | INFO | stage=TAXONOMY event=pass1_stored file_id=8b4c1cd7ca2e487191804c803966c99a rows=40
+2026-10-19 14:52:27,680 | INFO | stage=TAXONOMY event=pass2_stored file_id=8b4c1cd7ca2e487191804c803966c99a rows=40
+2026-10-19 14:56:18,952 | INFO | stage=UNICODE event=rollback_complete file_id=8b4c1cd7ca2e487191804c803966c99a
+2026-10-19 14:56:25,217 | INFO | stage=TAXONOMY event=start file_id=8b4c1cd7ca2e487191804c803966c99a rows=40
+2026-10-19 14:57:06,423 | INFO | stage=TAXONOMY event=pass1_stored file_id=8b4c1cd7ca2e487191804c803966c99a rows=40
+2026-10-19 14:57:25,265 | INFO | stage=TAXONOMY event=pass2_stored file_id=8b4c1cd7ca2e487191804c803966c99a rows=40
+2026-10-19 15:09:53,381 | INFO | stage=UNICODE event=start file_id=8b4c1cd7ca2e487191804c803966c99a rows=40 check_master=False
+2026-10-19 15:09:59,623 | INFO | stage=UNICODE event=complete file_id=8b4c1cd7ca2e487191804c803966c99a allocated=40
+2026-10-19 15:10:12,729 | INFO | stage=EXPORT event=start file_id=8b4c1cd7ca2e487191804c803966c99a rows=40 target=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_8b4c1cd7.xlsx
+2026-10-19 15:10:12,796 | INFO | stage=EXPORT event=completed path=/home/bhadiyakdraprinceashokbhai-l/Desktop/projects/gmr_data/gmr_code/catalog_export_8b4c1cd7.xlsx

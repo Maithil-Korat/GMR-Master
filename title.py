@@ -260,7 +260,14 @@ def batch(rows: list[dict[str, Any]], pass2: bool, api: Any | None = None, chunk
         input_path.unlink(missing_ok=True)
 
 
-def run(file_id: str, api: Any | None = None, row_ids: list[str] | None = None, chunk_size: int = CHUNK_SIZE, poll_seconds: float = 15.0) -> list[dict[str, Any]]:
+def run(
+    file_id: str,
+    api: Any | None = None,
+    row_ids: list[str] | None = None,
+    chunk_size: int = CHUNK_SIZE,
+    poll_seconds: float = 15.0,
+    job_manager: Any | None = None,
+) -> list[dict[str, Any]]:
     rows = database.rows(file_id)
     selected = {str(v) for v in row_ids} if row_ids else None
     rows = [r for r in rows if selected is None or r["Sr. no."] in selected]
@@ -276,21 +283,64 @@ def run(file_id: str, api: Any | None = None, row_ids: list[str] | None = None, 
 
     logger.event("TITLE", "start", file_id=file_id, rows=len(rows))
     service = api or client()
+    total_rows = len(rows)
+    
+    def check_cancelled() -> bool:
+        if job_manager and job_manager.is_cancelled(file_id):
+            logger.event("TITLE", "cancelled", file_id=file_id)
+            return True
+        return False
+    
+    def report_progress(processed: int, stage: str) -> None:
+        if job_manager:
+            progress = int((processed / total_rows) * 100)
+            job_manager.set(
+                file_id, "RUNNING", "TITLE", progress,
+                f"{stage}: {processed}/{total_rows}",
+                progress_counter=f"{processed}/{total_rows}"
+            )
 
     # Pass 1: Generation
+    report_progress(0, "Pass 1")
+    if check_cancelled():
+        return []
+    
     if len(rows) <= DIRECT_EXECUTION_THRESHOLD:
         drafts_map = direct_parallel_titles(rows, False, service)
         drafts = [drafts_map[int(r["Sr. no."])] for r in rows]
         pass1_batch_id = "direct-execution"
     else:
         drafts, pass1_batch_id = batch(rows, False, api=service, chunk_size=chunk_size, poll_seconds=poll_seconds)
+        
+        if job_manager:
+            job_manager.set(file_id, "RUNNING", "TITLE", 25, "Pass 1 batch submitted", batch_job_id=pass1_batch_id)
+        
+        while True:
+            if check_cancelled():
+                try:
+                    service.batches.cancel(name=pass1_batch_id)
+                    logger.event("TITLE", "batch_cancelled", file_id=file_id, batch_id=pass1_batch_id)
+                except Exception:
+                    pass
+                return []
+            
+            job = service.batches.get(name=pass1_batch_id)
+            state = getattr(job, "state", "")
+            if state in {"JOB_STATE_SUCCEEDED", "JOB_STATE_FAILED", "JOB_STATE_CANCELLED", "JOB_STATE_EXPIRED"}:
+                break
+            time.sleep(poll_seconds)
 
     database.update_title_drafts(file_id, pass1_batch_id, drafts)
     logger.event("TITLE", "pass1_stored", file_id=file_id, rows=len(drafts))
+    report_progress(len(drafts), "Pass 1 complete")
+
+    if check_cancelled():
+        return []
 
     # Pass 2: Audit
     audited_rows = database.rows(file_id)
     audited_rows = [r for r in audited_rows if selected is None or r["Sr. no."] in selected]
+    report_progress(len(drafts), "Pass 2")
 
     if len(audited_rows) <= DIRECT_EXECUTION_THRESHOLD:
         audits_map = direct_parallel_titles(audited_rows, True, service)
@@ -298,7 +348,27 @@ def run(file_id: str, api: Any | None = None, row_ids: list[str] | None = None, 
         pass2_batch_id = "direct-execution"
     else:
         audits, pass2_batch_id = batch(audited_rows, True, api=service, chunk_size=chunk_size, poll_seconds=poll_seconds)
+        
+        if job_manager:
+            job_manager.set(file_id, "RUNNING", "TITLE", 75, "Pass 2 batch submitted", batch_job_id=pass2_batch_id)
+        
+        while True:
+            if check_cancelled():
+                try:
+                    service.batches.cancel(name=pass2_batch_id)
+                    logger.event("TITLE", "batch_cancelled", file_id=file_id, batch_id=pass2_batch_id)
+                except Exception:
+                    pass
+                return []
+            
+            job = service.batches.get(name=pass2_batch_id)
+            state = getattr(job, "state", "")
+            if state in {"JOB_STATE_SUCCEEDED", "JOB_STATE_FAILED", "JOB_STATE_CANCELLED", "JOB_STATE_EXPIRED"}:
+                break
+            time.sleep(poll_seconds)
 
     database.update_title_audits(file_id, pass2_batch_id, audits)
     logger.event("TITLE", "pass2_stored", file_id=file_id, rows=len(audits))
+    report_progress(total_rows, "Complete")
+    
     return audits

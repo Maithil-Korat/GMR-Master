@@ -152,8 +152,14 @@ class TaxonomyTree:
 
     def filter_candidates(self, level1_hint: str | None, product_type: str | None, item_type: str | None) -> list[str]:
         candidates = self.all_paths
+
         if level1_hint:
             candidates = [p for p in candidates if p.startswith(f"{level1_hint}>") or p == level1_hint]
+        else:
+            candidates = [p for p in candidates if not (
+                p.startswith("Destination & Souvenirs>") or
+                p.startswith("Branded Locations>")
+            )]
 
         if item_type == "Non-Saleable":
             ns_terms = ("tester", "blotter", "gift with purchase", "gwp", "display", "dummy", "carry bags", "marketing material", "sample")
@@ -509,6 +515,7 @@ def run(
     row_ids: list[str] | None = None,
     chunk_size: int = CHUNK_SIZE,
     poll_seconds: float = 15.0,
+    job_manager: Any | None = None,
 ) -> list[dict[str, Any]]:
     tree = TaxonomyTree.get_instance(excel_path)
     rows = database.rows(file_id)
@@ -519,21 +526,64 @@ def run(
 
     logger.event("TAXONOMY", "start", file_id=file_id, rows=len(rows))
     service = api or client()
+    total_rows = len(rows)
+    
+    def check_cancelled() -> bool:
+        if job_manager and job_manager.is_cancelled(file_id):
+            logger.event("TAXONOMY", "cancelled", file_id=file_id)
+            return True
+        return False
+    
+    def report_progress(processed: int, stage: str) -> None:
+        if job_manager:
+            progress = int((processed / total_rows) * 100)
+            job_manager.set(
+                file_id, "RUNNING", "TAXONOMY", progress,
+                f"{stage}: {processed}/{total_rows}",
+                progress_counter=f"{processed}/{total_rows}"
+            )
 
     # Pass 1: Generation
+    report_progress(0, "Pass 1")
+    if check_cancelled():
+        return []
+    
     if len(rows) <= DIRECT_EXECUTION_THRESHOLD:
         drafts_map = direct_parallel_taxonomy(rows, tree, False, service)
         drafts = [drafts_map.get(int(r["Sr. no."]), default_fallback_draft(r)) for r in rows]
         pass1_batch_id = "direct-execution"
     else:
         drafts, pass1_batch_id = batch(rows, tree, False, api=service, chunk_size=chunk_size, poll_seconds=poll_seconds)
+        
+        if job_manager:
+            job_manager.set(file_id, "RUNNING", "TAXONOMY", 25, "Pass 1 batch submitted", batch_job_id=pass1_batch_id)
+        
+        while True:
+            if check_cancelled():
+                try:
+                    service.batches.cancel(name=pass1_batch_id)
+                    logger.event("TAXONOMY", "batch_cancelled", file_id=file_id, batch_id=pass1_batch_id)
+                except Exception:
+                    pass
+                return []
+            
+            job = service.batches.get(name=pass1_batch_id)
+            state = getattr(job, "state", "")
+            if state in {"JOB_STATE_SUCCEEDED", "JOB_STATE_FAILED", "JOB_STATE_CANCELLED", "JOB_STATE_EXPIRED"}:
+                break
+            time.sleep(poll_seconds)
 
     database.update_taxonomy_drafts(file_id, pass1_batch_id, drafts)
     logger.event("TAXONOMY", "pass1_stored", file_id=file_id, rows=len(drafts))
+    report_progress(len(drafts), "Pass 1 complete")
+
+    if check_cancelled():
+        return []
 
     # Pass 2: Audit
     audited_rows = database.rows(file_id)
     audited_rows = [row for row in audited_rows if selected is None or row["Sr. no."] in selected]
+    report_progress(len(drafts), "Pass 2")
 
     if len(audited_rows) <= DIRECT_EXECUTION_THRESHOLD:
         audits_map = direct_parallel_taxonomy(audited_rows, tree, True, service)
@@ -541,7 +591,27 @@ def run(
         pass2_batch_id = "direct-execution"
     else:
         audits, pass2_batch_id = batch(audited_rows, tree, True, api=service, chunk_size=chunk_size, poll_seconds=poll_seconds)
+        
+        if job_manager:
+            job_manager.set(file_id, "RUNNING", "TAXONOMY", 75, "Pass 2 batch submitted", batch_job_id=pass2_batch_id)
+        
+        while True:
+            if check_cancelled():
+                try:
+                    service.batches.cancel(name=pass2_batch_id)
+                    logger.event("TAXONOMY", "batch_cancelled", file_id=file_id, batch_id=pass2_batch_id)
+                except Exception:
+                    pass
+                return []
+            
+            job = service.batches.get(name=pass2_batch_id)
+            state = getattr(job, "state", "")
+            if state in {"JOB_STATE_SUCCEEDED", "JOB_STATE_FAILED", "JOB_STATE_CANCELLED", "JOB_STATE_EXPIRED"}:
+                break
+            time.sleep(poll_seconds)
 
     database.update_taxonomy_audits(file_id, pass2_batch_id, audits)
     logger.event("TAXONOMY", "pass2_stored", file_id=file_id, rows=len(audits))
+    report_progress(total_rows, "Complete")
+    
     return audits

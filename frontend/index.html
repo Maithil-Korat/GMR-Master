@@ -130,6 +130,7 @@ main.wrap { max-width: 1780px; margin: 0 auto; padding: 20px 28px 48px; display:
 .step.on small { color: rgba(255,255,255,0.8); }
 
 .live { padding: 10px 16px; display: flex; gap: 14px; align-items: center; font-size: 12.5px; font-weight: 600; }
+.live.sticky-run { position: sticky; top: 64px; z-index: 20; box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
 .live.err { background: var(--blocked-bg); color: var(--blocked); border-color: var(--blocked-border); }
 .bar { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
 .bar i { display: block; height: 100%; background: var(--accent-gold); transition: width 0.4s; }
@@ -557,7 +558,7 @@ function ExportModal({ m, onClose, onGo }) {
 
 function Workspace({ file, onExit, onOpenColumns }) {
   const id = file.file_id;
-  const [job, setJob] = useState({ status: "IDLE", active_stage: "", progress_percent: 0, message: "" });
+  const [job, setJob] = useState({ status: "IDLE", active_stage: "", progress_percent: 0, progress_counter: "", message: "" });
   const [m, setM] = useState({ total: file.total_rows || 0, clean: 0, review_required: 0, blocked: 0, duplicates: 0, issue_clusters: {} });
   const [rows, setRows] = useState([]), [total, setTotal] = useState(0), [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1), [limit, setLimit] = useState(50);
@@ -565,6 +566,7 @@ function Workspace({ file, onExit, onOpenColumns }) {
   const [search, setSearch] = useState(""), [q, setQ] = useState("");
   const [selected, setSelected] = useState(new Set()), [editing, setEditing] = useState(null), [focus, setFocus] = useState(0);
   const [hint, setHint] = useState(""), [rerun, setRerun] = useState("TITLE"), [exportOpen, setExportOpen] = useState(false);
+  const [linkDupes, setLinkDupes] = useState(false);
   const [toasts, setToasts] = useState([]), [tick, setTick] = useState(0);
   // In Workspace component of frontend/index.html:
 
@@ -610,12 +612,13 @@ function Workspace({ file, onExit, onOpenColumns }) {
     } catch {}
   }, [id]);
 
-  // Regular continuous polling that survives page changes & background runs
+  // Adaptive polling based on job status
   useEffect(() => {
     refreshStatus();
-    const timer = setInterval(refreshStatus, 2000);
+    const interval = job.status === "RUNNING" ? 2000 : 10000;
+    const timer = setInterval(refreshStatus, interval);
     return () => clearInterval(timer);
-  }, [refreshStatus]);
+  }, [refreshStatus, job.status]);
 
   useEffect(() => {
     const t = setTimeout(() => { setQ(search); setPage(1); }, 250);
@@ -642,7 +645,7 @@ function Workspace({ file, onExit, onOpenColumns }) {
     setJob(j => ({ ...j, status: "RUNNING", active_stage: stage, progress_percent: 5, message: "Starting..." }));
     try {
       await api(`/api/files/${id}/stages/run`, {
-        json: { stage, check_master: true, selected_row_ids: rowIds.map(S), operator_hint: hint }
+        json: { stage, check_master: linkDupes, selected_row_ids: rowIds.map(S), operator_hint: hint }
       });
       setSelected(new Set());
     } catch (e) {
@@ -687,6 +690,16 @@ function Workspace({ file, onExit, onOpenColumns }) {
     } catch (e) { notify(e.message, "err"); }
   };
 
+  const bulkUnlink = async list => {
+    try {
+      const d = await getJSON(`/api/files/${id}/unlink-duplicates`, { method: "POST", json: { row_ids: list } });
+      notify(d.message);
+      setSelected(new Set());
+      reload();
+      refreshStatus();
+    } catch (e) { notify(e.message, "err"); }
+  };
+
   const undo = async () => {
     if (!confirm("Rollback item numbers allocated for this file?")) return;
     try {
@@ -694,6 +707,15 @@ function Workspace({ file, onExit, onOpenColumns }) {
       notify("Allocations reverted.");
       refreshStatus();
       reload();
+    } catch (e) { notify(e.message, "err"); }
+  };
+
+  const cancelJob = async () => {
+    if (!confirm("Cancel the running job? In-flight API calls will complete.")) return;
+    try {
+      await api(`/api/files/${id}/cancel`, { method: "POST" });
+      notify("Job cancellation requested.");
+      refreshStatus();
     } catch (e) { notify(e.message, "err"); }
   };
 
@@ -749,6 +771,10 @@ function Workspace({ file, onExit, onOpenColumns }) {
       📤 Import Edited Excel
     </button>
     <input ref=${syncInp} type="file" hidden accept=".xlsx,.xls,.xlsb" onChange=${handleSyncExcel} />
+    <label class="mute" style="display:flex; align-items:center; gap:6px; font-size:12px; cursor:pointer;" title="Reuse existing item numbers for matching titles. Off by default: every row gets a unique number.">
+      <input type="checkbox" checked=${linkDupes} disabled=${running} onChange=${e => setLinkDupes(e.target.checked)} />
+      Find duplicates (reuse item numbers)
+    </label>
     <button class="btn gold" disabled=${running} onClick=${() => run("AUTO_PILOT")}>
       ${running ? "Processing..." : "⚡ Run Auto-Pilot"}
     </button>
@@ -767,15 +793,26 @@ function Workspace({ file, onExit, onOpenColumns }) {
     </section>
 
     ${running ? html`
-      <div class="panel live" role="status">
+      <div class="panel live sticky-run" role="status">
         <div class="bar"><i style=${`width:${job.progress_percent}%`}></i></div>
-        <span>${job.message || "Working..."} (${job.progress_percent}%)</span>
+        <span>${job.message || "Working..."} (${job.progress_counter || job.progress_percent + "%"})</span>
+        <button class="btn sm" style="background:var(--blocked);color:#fff;margin-left:10px;" onClick=${cancelJob}>Stop</button>
+      </div>
+    ` : ""}
+
+    ${job.status === "CANCELLED" ? html`
+      <div class="panel live" style="background:var(--review-bg);border-color:var(--review-border);color:var(--review);">
+        <b>Job Cancelled:</b> ${job.message}
       </div>
     ` : ""}
 
     ${job.status === "ERROR" ? html`
-      <div class="panel live err" role="alert">
-        <b>Stage Alert:</b> ${job.error || job.message}
+      <div class="panel live err" role="alert" style="flex-direction:column; align-items:flex-start; gap:6px;">
+        <b style="font-size:13px;">
+          ⚠ ${(STAGES.find(([k]) => k === job.error_stage) || [,"Pipeline"])[1]} stage failed
+        </b>
+        <span style="font-weight:500; word-break:break-word;">${job.error || job.message}</span>
+        <span class="mute" style="font-size:11px;">Fix the issue and re-run this stage. Earlier completed stages were saved.</span>
       </div>
     ` : ""}
 
@@ -810,6 +847,7 @@ function Workspace({ file, onExit, onOpenColumns }) {
         <input placeholder="Optional AI operator hint, e.g. Brand is Byredo, 100ml" value=${hint} onInput=${e => setHint(e.target.value)} />
         <button class="btn gold" disabled=${running} onClick=${() => run(rerun, ids)}>Re-run on Selected</button>
         <button class="btn sm" onClick=${() => approve(ids)}>Mark Reviewed</button>
+        <button class="btn sm" onClick=${() => bulkUnlink(ids)} title="Generate new unique item numbers for selected duplicates">Unlink Duplicates</button>
         <button class="btn sm" style="background:transparent; color:#fff; border-color:#475569;" onClick=${() => setSelected(new Set())}>Clear</button>
       </div>
     ` : ""}

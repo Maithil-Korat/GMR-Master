@@ -155,7 +155,6 @@ def client() -> Any:
 
 
 def direct_parallel_classify(rows: list[dict[str, Any]], api: Any) -> list[dict[str, Any]]:
-    """Fast concurrent direct API execution for small/medium batches (takes ~2 seconds)."""
     chunks = [rows[i : i + CHUNK_SIZE] for i in range(0, len(rows), CHUNK_SIZE)]
     schema = inline_schema(BatchItemTypeResponse)
 

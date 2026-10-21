@@ -49,7 +49,7 @@ Mandatory Master Fields (Must NEVER be 'NA'):
    - Uppercase ASCII, max 33 characters. Include Brand, Line, Size/Volume cleanly.
 
 5. Descriptions:
-   - Short description (~100 words).
+   - Short description (20-30 words).
    - Long description (~300 words) highlighting flavor/craftsmanship, tasting notes, or design specs.
 
 Return only structured JSON and preserve row_id exactly."""
@@ -59,7 +59,7 @@ Audit Pass 1 content. Ensure:
 1. HSN is an exact 6-digit code.
 2. Country of Origin is a valid Country (NEVER 'NA').
 3. Invoice Name is <= 33 characters, uppercase ASCII.
-4. Descriptions are rich, accurate, and professional.
+4. Descriptions are rich, accurate, and professional. Short description must be 20-30 words; trim it if longer.
 
 Return corrected structured content. Preserve row_id exactly."""
 
@@ -348,6 +348,7 @@ def run(
     row_ids: list[str] | None = None,
     chunk_size: int = CHUNK_SIZE,
     poll_seconds: float = 15.0,
+    job_manager: Any | None = None,
 ) -> list[dict[str, Any]]:
     rows = database.rows(file_id)
     selected = {str(v) for v in row_ids} if row_ids else None
@@ -356,16 +357,58 @@ def run(
         return []
 
     service = api or client()
+    total_rows = len(rows)
+    
+    def check_cancelled() -> bool:
+        if job_manager and job_manager.is_cancelled(file_id):
+            logger.event("CONTENT", "cancelled", file_id=file_id)
+            return True
+        return False
+    
+    def report_progress(processed: int, stage: str) -> None:
+        if job_manager:
+            progress = int((processed / total_rows) * 100)
+            job_manager.set(
+                file_id, "RUNNING", "CONTENT", progress,
+                f"{stage}: {processed}/{total_rows}",
+                progress_counter=f"{processed}/{total_rows}"
+            )
 
     # Pass 1: Generation
+    report_progress(0, "Pass 1")
+    if check_cancelled():
+        return []
+    
     if len(rows) <= DIRECT_EXECUTION_THRESHOLD:
         drafts_map = direct_parallel_content(rows, False, [], service)
         drafts = [drafts_map[int(r["Sr. no."])] for r in rows]
         pass1_batch_id = "direct-execution"
     else:
         drafts, pass1_batch_id = batch(rows, False, [], api=service, chunk_size=chunk_size, poll_seconds=poll_seconds)
+        
+        if job_manager:
+            job_manager.set(file_id, "RUNNING", "CONTENT", 25, "Pass 1 batch submitted", batch_job_id=pass1_batch_id)
+        
+        while True:
+            if check_cancelled():
+                try:
+                    service.batches.cancel(name=pass1_batch_id)
+                    logger.event("CONTENT", "batch_cancelled", file_id=file_id, batch_id=pass1_batch_id)
+                except Exception:
+                    pass
+                return []
+            
+            job = service.batches.get(name=pass1_batch_id)
+            state = getattr(job, "state", "")
+            if state in {"JOB_STATE_SUCCEEDED", "JOB_STATE_FAILED", "JOB_STATE_CANCELLED", "JOB_STATE_EXPIRED"}:
+                break
+            time.sleep(poll_seconds)
 
     database.update_content_drafts(file_id, pass1_batch_id, drafts)
+    report_progress(len(drafts), "Pass 1 complete")
+
+    if check_cancelled():
+        return []
 
     # Pass 2: Audit
     all_rows = database.rows(file_id)
@@ -374,6 +417,7 @@ def run(
         for r in all_rows if r.get("Content Pass 1", {}).get("brand_name")
     })
     audited_rows = [r for r in all_rows if selected is None or r["Sr. no."] in selected]
+    report_progress(len(drafts), "Pass 2")
 
     if len(audited_rows) <= DIRECT_EXECUTION_THRESHOLD:
         audits_map = direct_parallel_content(audited_rows, True, brand_candidates, service)
@@ -381,6 +425,24 @@ def run(
         pass2_batch_id = "direct-execution"
     else:
         audits, pass2_batch_id = batch(audited_rows, True, brand_candidates, api=service, chunk_size=chunk_size, poll_seconds=poll_seconds)
+        
+        if job_manager:
+            job_manager.set(file_id, "RUNNING", "CONTENT", 75, "Pass 2 batch submitted", batch_job_id=pass2_batch_id)
+        
+        while True:
+            if check_cancelled():
+                try:
+                    service.batches.cancel(name=pass2_batch_id)
+                    logger.event("CONTENT", "batch_cancelled", file_id=file_id, batch_id=pass2_batch_id)
+                except Exception:
+                    pass
+                return []
+            
+            job = service.batches.get(name=pass2_batch_id)
+            state = getattr(job, "state", "")
+            if state in {"JOB_STATE_SUCCEEDED", "JOB_STATE_FAILED", "JOB_STATE_CANCELLED", "JOB_STATE_EXPIRED"}:
+                break
+            time.sleep(poll_seconds)
 
     # Invoices uniqueness & Parent company consistency
     used = database.invoice_names(exclude_file_id=file_id)
@@ -411,4 +473,6 @@ def run(
             brand_parents[bkey] = parent
 
     database.update_content_audits(file_id, pass2_batch_id, audits)
+    report_progress(total_rows, "Complete")
+    
     return audits
