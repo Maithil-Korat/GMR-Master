@@ -12,6 +12,7 @@ from pydantic import BaseModel
 
 import database
 import logger
+import gemini
 from normalize import normalize_product_type
 
 try:
@@ -97,15 +98,10 @@ def build_chunk_payload(chunk: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def client() -> Any:
-    api_key = os.environ.get("GEMINI_API_KEY", "").strip()
-    if not api_key:
-        raise RuntimeError("GEMINI_API_KEY is required for Product Type classification")
-    if genai is None:
-        raise RuntimeError("google-genai is required for Product Type classification")
-    return genai.Client(api_key=api_key)
+    return gemini.build_client("Product Type classification")
 
 
-def direct_parallel_classify(rows: list[dict[str, Any]], api: Any) -> dict[int, str]:
+def direct_parallel_classify(rows: list[dict[str, Any]], api: Any, on_progress: Any | None = None) -> dict[int, str]:
     """Fast direct parallel execution for <= 200 items (~2 seconds)."""
     chunks = [rows[i : i + CHUNK_SIZE] for i in range(0, len(rows), CHUNK_SIZE)]
     schema = inline_schema(BatchClassificationResponse)
@@ -132,6 +128,8 @@ def direct_parallel_classify(rows: list[dict[str, Any]], api: Any) -> dict[int, 
         for chunk_items in executor.map(_process_chunk, chunks):
             for item in chunk_items:
                 classifications[item.row_id] = item.product_type
+            if on_progress:
+                on_progress(len(chunk_items))
     return classifications
 
 
@@ -205,7 +203,7 @@ def batch_classify(rows: list[dict[str, Any]], api: Any, chunk_size: int = CHUNK
         input_path.unlink(missing_ok=True)
 
 
-def classify_file(file_id: str, api: Any | None = None, chunk_size: int = CHUNK_SIZE, poll_seconds: float = 15.0) -> list[dict[str, Any]]:
+def classify_file(file_id: str, api: Any | None = None, chunk_size: int = CHUNK_SIZE, poll_seconds: float = 15.0, job_manager: Any | None = None) -> list[dict[str, Any]]:
     rows = database.rows(file_id)
     missing = [row["Sr. no."] for row in rows if not (row.get("Combined Description") or row.get("Secondary Product Description"))]
     if missing:
@@ -213,12 +211,38 @@ def classify_file(file_id: str, api: Any | None = None, chunk_size: int = CHUNK_
 
     logger.event("PRODUCT_TYPE", "file_loaded", file_id=file_id, rows=len(rows))
     service = api or client()
+    total_rows = len(rows)
+
+    _done = {"n": 0}
+
+    def _chunk_progress(count: int) -> None:
+        if job_manager:
+            _done["n"] += count
+            progress = int((_done["n"] / max(1, total_rows)) * 100)
+            job_manager.set(
+                file_id, "RUNNING", "PRODUCT_TYPE", progress,
+                f"Classifying product types: {_done['n']}/{total_rows}",
+                progress_counter=f"{_done['n']}/{total_rows}"
+            )
+
+    if job_manager:
+        job_manager.set(
+            file_id, "RUNNING", "PRODUCT_TYPE", 0,
+            f"Classifying product types: 0/{total_rows}",
+            progress_counter=f"0/{total_rows}"
+        )
 
     if len(rows) <= DIRECT_EXECUTION_THRESHOLD:
-        classifications = direct_parallel_classify(rows, service)
+        classifications = direct_parallel_classify(rows, service, on_progress=_chunk_progress)
         batch_id = "direct-execution"
     else:
         classifications, batch_id = batch_classify(rows, service, chunk_size, poll_seconds)
+        if job_manager:
+            job_manager.set(
+                file_id, "RUNNING", "PRODUCT_TYPE", 100,
+                f"Classified {total_rows}/{total_rows} product types",
+                progress_counter=f"{total_rows}/{total_rows}"
+            )
 
     expected = {int(row["Sr. no."]) for row in rows}
     missing_ids = sorted(expected - classifications.keys())

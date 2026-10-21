@@ -10,6 +10,7 @@ from typing import Any
 
 import database
 import logger
+import gemini
 from attribute_schema import descriptions, load, names
 from normalize import normalize_attribute
 
@@ -114,12 +115,7 @@ def source(row: dict[str, Any], pass2: bool, attribute_descriptions: dict[str, s
 
 
 def client() -> Any:
-    key = os.environ.get("GEMINI_API_KEY", "").strip()
-    if not key:
-        raise RuntimeError("GEMINI_API_KEY is required for attribute generation")
-    if genai is None:
-        raise RuntimeError("google-genai is required for attribute generation")
-    return genai.Client(api_key=key)
+    return gemini.build_client("Attribute generation")
 
 
 def process_item_attributes(value: dict[str, Any], category_names: list[str]) -> tuple[dict[str, str], dict[str, list[str]]]:
@@ -135,6 +131,7 @@ def direct_parallel_attributes(
     schema_map: dict[str, Any],
     pass2: bool,
     api: Any,
+    on_progress: Any | None = None,
 ) -> dict[int, dict[str, Any]]:
     groups: dict[str, list[dict[str, Any]]] = {}
     for row in rows:
@@ -185,6 +182,8 @@ def direct_parallel_attributes(
         for chunk_res in executor.map(_execute_task, tasks):
             for res in chunk_res:
                 values[int(res["row_id"])] = res
+            if on_progress:
+                on_progress(len(chunk_res))
     return values
 
 
@@ -320,19 +319,27 @@ def run(
     
     def report_progress(processed: int, stage: str) -> None:
         if job_manager:
-            progress = int((processed / total_rows) * 100)
+            span = max(1, total_rows * 2)
+            progress = int((processed / span) * 100)
+            shown = min(processed, total_rows) if processed <= total_rows else min(processed - total_rows, total_rows)
             job_manager.set(
                 file_id, "RUNNING", "ATTRIBUTES", progress,
-                f"{stage}: {processed}/{total_rows}",
-                progress_counter=f"{processed}/{total_rows}"
+                f"{stage}: {shown}/{total_rows}",
+                progress_counter=f"{shown}/{total_rows}"
             )
+
+    _done = {"n": 0}
+
+    def _chunk_progress(count: int, stage: str) -> None:
+        _done["n"] += count
+        report_progress(_done["n"], stage)
 
     report_progress(0, "Pass 1")
     if check_cancelled():
         return []
     
     if len(rows) <= DIRECT_EXECUTION_THRESHOLD:
-        drafts_map = direct_parallel_attributes(rows, schema_map, False, service)
+        drafts_map = direct_parallel_attributes(rows, schema_map, False, service, on_progress=lambda c: _chunk_progress(c, "Pass 1"))
         drafts = [drafts_map[int(r["Sr. no."])] for r in rows]
         pass1_batch_id = "direct-execution"
     else:
@@ -357,7 +364,8 @@ def run(
             time.sleep(poll_seconds)
 
     database.update_attribute_drafts(file_id, pass1_batch_id, drafts)
-    report_progress(len(drafts), "Pass 1 complete")
+    _done["n"] = total_rows
+    report_progress(_done["n"], "Pass 1 complete")
 
     if check_cancelled():
         return []
@@ -365,10 +373,10 @@ def run(
     # Pass 2: Audit
     audited_rows = database.rows(file_id)
     audited_rows = [row for row in audited_rows if selected is None or row["Sr. no."] in selected]
-    report_progress(len(drafts), "Pass 2")
+    report_progress(_done["n"], "Pass 2")
 
     if len(audited_rows) <= DIRECT_EXECUTION_THRESHOLD:
-        audits_map = direct_parallel_attributes(audited_rows, schema_map, True, service)
+        audits_map = direct_parallel_attributes(audited_rows, schema_map, True, service, on_progress=lambda c: _chunk_progress(c, "Pass 2"))
         audits = [audits_map[int(r["Sr. no."])] for r in audited_rows]
         pass2_batch_id = "direct-execution"
     else:
@@ -393,6 +401,6 @@ def run(
             time.sleep(poll_seconds)
 
     database.update_attribute_audits(file_id, pass2_batch_id, audits)
-    report_progress(total_rows, "Complete")
+    report_progress(total_rows * 2, "Complete")
     
     return audits

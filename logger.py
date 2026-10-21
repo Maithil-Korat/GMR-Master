@@ -1,12 +1,27 @@
 from __future__ import annotations
 
 import logging
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import Any
 
 LOGGER_NAME = "gmr.catalog"
 LOG_PATH = Path("catalog.log")
 CURRENT_PATH: Path | None = None
+
+NOISY_PATHS = ("/status", "/favicon.ico")
+
+
+class AccessLogFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        args = record.args
+        if not isinstance(args, tuple) or len(args) < 3:
+            return True
+        path = str(args[2])
+        if not any(p in path for p in NOISY_PATHS):
+            return True
+        status = int(args[4]) if len(args) >= 5 and str(args[4]).isdigit() else 200
+        return status >= 400
 
 
 def configure(path: str | Path | None = None) -> logging.Logger:
@@ -24,10 +39,11 @@ def configure(path: str | Path | None = None) -> logging.Logger:
     logging.getLogger("google").setLevel(logging.WARNING)
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.getLogger("httpcore").setLevel(logging.WARNING)
+    logging.getLogger("uvicorn.access").addFilter(AccessLogFilter())
     formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
     console = logging.StreamHandler()
     console.setFormatter(formatter)
-    file = logging.FileHandler(target, encoding="utf-8")
+    file = RotatingFileHandler(target, maxBytes=5_000_000, backupCount=3, encoding="utf-8")
     file.setFormatter(formatter)
     logger.addHandler(console)
     logger.addHandler(file)
@@ -36,7 +52,7 @@ def configure(path: str | Path | None = None) -> logging.Logger:
     return logger
 
 
-def event(stage: str, name: str, **fields: Any) -> None:
+def event(_stage: str, _name: str, level: int = logging.INFO, **fields: Any) -> None:
     logger = configure()
     values = " ".join(f"{key}={value}" for key, value in fields.items())
-    logger.info("stage=%s event=%s%s", stage, name, f" {values}" if values else "")
+    logger.log(level, "stage=%s event=%s%s", _stage, _name, f" {values}" if values else "")

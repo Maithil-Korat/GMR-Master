@@ -6,9 +6,11 @@ load_dotenv()
 
 import asyncio
 import json
+import logging
 import shutil
 import tempfile
 import threading
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -30,13 +32,19 @@ import ingest
 import item_number
 import item_type
 import logger
+import gemini
 import product_type
 import taxonomy_v2
 import title
 import fields
 
-if not os.environ.get("GEMINI_API_KEY"):
-    logger.event("WARNING", "missing_env_key", message="GEMINI_API_KEY is not set in environment or .env file")
+logger.event(
+    "APP", "startup",
+    gemini_key=gemini.has_api_key(),
+    timeout_ms=gemini.REQUEST_TIMEOUT_MS,
+)
+if not gemini.has_api_key():
+    logger.event("APP", "missing_env_key", level=logging.WARNING, message="GEMINI_API_KEY not set — AI stages will fail fast at run time")
 
 StageType = Literal[
     "FIELD_MAP", "ITEM_TYPE", "PRODUCT_TYPE", "TITLE",
@@ -328,6 +336,8 @@ class RowQueryService:
                 "cleaned_title": r.get("Title Pass 2") or r.get("Title Pass 1") or "",
                 "brand_name": content_p2.get("brand_name") or "",
                 "parent_company": content_p2.get("parent_company") or "",
+                "hsn_code": content_p2.get("hsn_code") or "",
+                "country_of_origin": content_p2.get("country_of_origin") or "",
                 "invoice_name": r.get("Invoice Name", ""),
                 "gmr_taxonomy": r.get("GMR Taxonomy", ""),
                 "base_code": base_code or "",
@@ -356,8 +366,8 @@ class PipelineWorker:
         row_ids = req.selected_row_ids if req.selected_row_ids else None
         steps = {
             "FIELD_MAP": ("Mapping semantic fields...", lambda: context.prepare(file_id)),
-            "ITEM_TYPE": ("Classifying item types...", lambda: item_type.classify_file(file_id)),
-            "PRODUCT_TYPE": ("Classifying product categories...", lambda: product_type.classify_file(file_id)),
+            "ITEM_TYPE": ("Classifying item types...", lambda: item_type.classify_file(file_id, job_manager=self.manager)),
+            "PRODUCT_TYPE": ("Classifying product categories...", lambda: product_type.classify_file(file_id, job_manager=self.manager)),
             "TITLE": ("Generating cleaned titles...", lambda: title.run(file_id, row_ids=row_ids, job_manager=self.manager)),
             "ATTRIBUTES": ("Extracting attributes...", lambda: attribute.run(file_id, row_ids=row_ids, job_manager=self.manager)),
             "CONTENT": ("Generating commercial content...", lambda: content.run(file_id, row_ids=row_ids, job_manager=self.manager)),
@@ -371,6 +381,9 @@ class PipelineWorker:
         try:
             self.manager.clear_cancel(file_id)
 
+            needs_gemini = any(s in plan for s in ("ITEM_TYPE", "PRODUCT_TYPE", "TITLE", "ATTRIBUTES", "CONTENT", "TAXONOMY"))
+            if needs_gemini:
+                gemini.preflight(f"Stage {req.stage}")
             initial_metrics = self._compute_metrics(file_id)
             total_rows = initial_metrics.get("total", 0)
             self.manager.set(
@@ -381,17 +394,24 @@ class PipelineWorker:
             )
 
             self.manager.begin_plan(file_id, plan)
+            logger.event("PIPELINE", "run_start", file_id=file_id, stage=req.stage, stages=",".join(plan), rows=total_rows)
+            run_start = time.perf_counter()
 
             for st_name in plan:
                 current = st_name
                 if self.manager.is_cancelled(file_id):
                     self.manager.set(file_id, "CANCELLED", st_name, 0, "Job cancelled by user")
+                    logger.event("PIPELINE", "cancelled", file_id=file_id, stage=st_name)
                     return
                 msg, action = steps[st_name]
                 self.manager.set(file_id, "RUNNING", st_name, 0, msg)
+                stage_start = time.perf_counter()
                 action()
+                logger.event("PIPELINE", "stage_done", file_id=file_id, stage=st_name, elapsed_s=round(time.perf_counter() - stage_start, 2))
+                self.manager.set(file_id, "RUNNING", st_name, 100, f"{msg} done")
                 completed.append(st_name)
 
+            logger.event("PIPELINE", "run_complete", file_id=file_id, stage=req.stage, stages=len(completed), elapsed_s=round(time.perf_counter() - run_start, 2))
             final_metrics = self._compute_metrics(file_id)
             self.manager.set(
                 file_id, "COMPLETED", req.stage, 100,

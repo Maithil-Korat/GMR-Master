@@ -12,6 +12,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 import database
+import gemini
 from normalize import normalize_item_type
 
 try:
@@ -146,15 +147,10 @@ def review(row: dict[str, Any], model_result: dict[str, Any]) -> dict[str, Any]:
 
 
 def client() -> Any:
-    api_key = os.environ.get("GEMINI_API_KEY", "").strip()
-    if not api_key:
-        raise RuntimeError("GEMINI_API_KEY is required for Item Type classification")
-    if genai is None:
-        raise RuntimeError("google-genai is required for Item Type classification")
-    return genai.Client(api_key=api_key)
+    return gemini.build_client("Item Type classification")
 
 
-def direct_parallel_classify(rows: list[dict[str, Any]], api: Any) -> list[dict[str, Any]]:
+def direct_parallel_classify(rows: list[dict[str, Any]], api: Any, on_progress: Any | None = None) -> list[dict[str, Any]]:
     chunks = [rows[i : i + CHUNK_SIZE] for i in range(0, len(rows), CHUNK_SIZE)]
     schema = inline_schema(BatchItemTypeResponse)
 
@@ -177,6 +173,8 @@ def direct_parallel_classify(rows: list[dict[str, Any]], api: Any) -> list[dict[
     with ThreadPoolExecutor(max_workers=5) as executor:
         for chunk_items in executor.map(_process_chunk, chunks):
             results.extend(chunk_items)
+            if on_progress:
+                on_progress(len(chunk_items))
     return results
 
 
@@ -247,7 +245,7 @@ def batch_classify(rows: list[dict[str, Any]], api: Any, poll_seconds: float = 1
         input_path.unlink(missing_ok=True)
 
 
-def classify(rows: list[dict[str, Any]], api: Any | None = None, poll_seconds: float = 10.0) -> list[dict[str, Any]]:
+def classify(rows: list[dict[str, Any]], api: Any | None = None, poll_seconds: float = 10.0, on_progress: Any | None = None) -> list[dict[str, Any]]:
     if not rows:
         return []
     
@@ -255,7 +253,7 @@ def classify(rows: list[dict[str, Any]], api: Any | None = None, poll_seconds: f
 
     # Fast path: <200 rows uses direct parallel API (~2 sec)
     if len(rows) <= DIRECT_EXECUTION_THRESHOLD:
-        model_results = direct_parallel_classify(rows, service)
+        model_results = direct_parallel_classify(rows, service, on_progress=on_progress)
     else:
         # Large files use chunked Batch API
         model_results = batch_classify(rows, service, poll_seconds)
@@ -270,11 +268,41 @@ def classify(rows: list[dict[str, Any]], api: Any | None = None, poll_seconds: f
     return decisions
 
 
-def classify_file(file_id: str, poll_seconds: float = 10.0) -> list[dict[str, Any]]:
+def classify_file(file_id: str, poll_seconds: float = 10.0, job_manager: Any | None = None) -> list[dict[str, Any]]:
     rows = database.rows(file_id)
     missing = [row["Sr. no."] for row in rows if not (row.get("Combined Description") or row.get("Secondary Product Description"))]
     if missing:
         raise RuntimeError(f"Separated product contexts are required before Item Type classification: {missing[:10]}")
-    decisions = classify(rows, poll_seconds=poll_seconds)
+
+    total_rows = len(rows)
+    _done = {"n": 0}
+
+    def _chunk_progress(count: int) -> None:
+        if job_manager:
+            _done["n"] += count
+            progress = int((_done["n"] / max(1, total_rows)) * 100)
+            job_manager.set(
+                file_id, "RUNNING", "ITEM_TYPE", progress,
+                f"Classifying item types: {_done['n']}/{total_rows}",
+                progress_counter=f"{_done['n']}/{total_rows}"
+            )
+
+    if job_manager:
+        job_manager.set(
+            file_id, "RUNNING", "ITEM_TYPE", 0,
+            f"Classifying item types: 0/{total_rows}",
+            progress_counter=f"0/{total_rows}"
+        )
+
+    decisions = classify(rows, poll_seconds=poll_seconds, on_progress=_chunk_progress)
+
+    # The batch API path (large files) does not report per-chunk; snap to 100%.
+    if job_manager and total_rows > DIRECT_EXECUTION_THRESHOLD:
+        job_manager.set(
+            file_id, "RUNNING", "ITEM_TYPE", 100,
+            f"Classified {total_rows}/{total_rows} item types",
+            progress_counter=f"{total_rows}/{total_rows}"
+        )
+
     database.update_item_types(file_id, decisions)
     return decisions

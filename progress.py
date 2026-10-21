@@ -4,6 +4,7 @@ import os
 from typing import Any, Callable
 
 import logger
+import gemini
 
 try:
     from google import genai
@@ -64,9 +65,4 @@ def check_batch_cancelled(api: Any, batch_id: str, manager: Any, file_id: str, s
 
 
 def get_gemini_client() -> Any:
-    key = os.environ.get("GEMINI_API_KEY", "").strip()
-    if not key:
-        raise RuntimeError("GEMINI_API_KEY is required")
-    if genai is None:
-        raise RuntimeError("google-genai is required")
-    return genai.Client(api_key=key)
+    return gemini.build_client("Gemini API")
