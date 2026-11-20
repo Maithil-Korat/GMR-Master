@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 import database
 import logger
 import gemini
-from normalize import changed, normalize_title
+from normalize import changed, is_liquor_product, normalize_title
 
 try:
     from google import genai
@@ -167,8 +167,15 @@ def direct_parallel_titles(rows: list[dict[str, Any]], pass2: bool, api: Any, on
             },
         )
         raw = json.loads(response.text)
+        liquor_by_row = {
+            int(row["Sr. no."]): is_liquor_product(row.get("Product Type"))
+            for row in chunk
+        }
         for result in raw.get("results", []):
-            result[field] = normalize_title(result.get(field, ""))
+            result[field] = normalize_title(
+                result.get(field, ""),
+                liquor=liquor_by_row.get(int(result["row_id"]), False),
+            )
         return schema_model.model_validate(raw).results
 
     values: dict[int, dict[str, Any]] = {}
@@ -231,6 +238,10 @@ def batch(rows: list[dict[str, Any]], pass2: bool, api: Any | None = None, chunk
 
         res_file = getattr(getattr(job, "dest", None), "file_name", None)
         content = service.files.download(file=res_file).decode("utf-8")
+        liquor_by_row = {
+            int(row["Sr. no."]): is_liquor_product(row.get("Product Type"))
+            for row in rows
+        }
 
         values: dict[int, dict[str, Any]] = {}
         for line in content.splitlines():
@@ -243,7 +254,10 @@ def batch(rows: list[dict[str, Any]], pass2: bool, api: Any | None = None, chunk
                 if text:
                     raw = json.loads(text)
                     for r in raw.get("results", []):
-                        r[field] = normalize_title(r.get(field, ""))
+                        r[field] = normalize_title(
+                            r.get(field, ""),
+                            liquor=liquor_by_row.get(int(r["row_id"]), False),
+                        )
                     parsed = schema_model.model_validate(raw)
                     for r in parsed.results:
                         values[r.row_id] = r.model_dump()

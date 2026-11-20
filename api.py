@@ -37,6 +37,7 @@ import product_type
 import taxonomy_v2
 import title
 import fields
+from normalize import is_liquor_product, normalize_attribute, normalize_title
 
 logger.event(
     "APP", "startup",
@@ -551,7 +552,7 @@ async def sync_excel_edits(file_id: str, file: UploadFile = File(...)):
                 # Fetch existing row JSON state
                 db_record = conn.execute(
                     """
-                    SELECT content_pass2_json, attributes_pass2_json, gmr_taxonomy 
+                    SELECT content_pass2_json, attributes_pass2_json, gmr_taxonomy, product_type
                     FROM raw_rows 
                     WHERE file_id = ? AND sr_no = ?
                     """,
@@ -563,6 +564,12 @@ async def sync_excel_edits(file_id: str, file: UploadFile = File(...)):
 
                 content_p2 = json.loads(db_record["content_pass2_json"] or "{}")
                 attrs_p2 = json.loads(db_record["attributes_pass2_json"] or "{}")
+                effective_product_type = (
+                    str(row[pt_col]).strip()
+                    if pt_col and str(row[pt_col]).strip()
+                    else db_record["product_type"]
+                )
+                liquor = is_liquor_product(effective_product_type)
 
                 # 1. Update Core Content Fields
                 if brand_col and str(row[brand_col]).strip():
@@ -570,7 +577,7 @@ async def sync_excel_edits(file_id: str, file: UploadFile = File(...)):
                 if parent_col and str(row[parent_col]).strip():
                     content_p2["parent_company"] = str(row[parent_col]).strip()
                 if size_col and str(row[size_col]).strip():
-                    content_p2["product_size"] = str(row[size_col]).strip()
+                    content_p2["product_size"] = normalize_title(str(row[size_col]).strip(), liquor=liquor)
                 if short_desc_col and str(row[short_desc_col]).strip():
                     content_p2["short_description"] = str(row[short_desc_col]).strip()
                 if long_desc_col and str(row[long_desc_col]).strip():
@@ -580,7 +587,7 @@ async def sync_excel_edits(file_id: str, file: UploadFile = File(...)):
                 if country_col and str(row[country_col]).strip():
                     content_p2["country_of_origin"] = str(row[country_col]).strip()
                 if invoice_col and str(row[invoice_col]).strip():
-                    content_p2["invoice_name"] = str(row[invoice_col]).strip().upper()[:33]
+                    content_p2["invoice_name"] = normalize_title(str(row[invoice_col]).strip(), liquor=liquor).upper()[:33]
 
                 # 2. Update Attributes (from Attribute 1..10 Key:Value format or Attributes Given JSON)
                 if attrs_given_col and str(row[attrs_given_col]).strip().startswith("{"):
@@ -595,7 +602,12 @@ async def sync_excel_edits(file_id: str, file: UploadFile = File(...)):
                         k = parts[0].strip()
                         v = parts[1].strip()
                         if k and v:
-                            attrs_p2[k] = v
+                            attrs_p2[k] = normalize_attribute(k, v, liquor=liquor)
+
+                attrs_p2 = {
+                    name: normalize_attribute(name, value, liquor=liquor)
+                    for name, value in attrs_p2.items()
+                }
 
                 # 3. Prepare Database SQL Updates
                 sql_updates = [
@@ -610,7 +622,7 @@ async def sync_excel_edits(file_id: str, file: UploadFile = File(...)):
 
                 if title_col and str(row[title_col]).strip():
                     sql_updates.append("title_pass2 = ?")
-                    params.append(str(row[title_col]).strip())
+                    params.append(normalize_title(str(row[title_col]).strip(), liquor=liquor))
 
                 if pt_col and str(row[pt_col]).strip():
                     sql_updates.append("product_type = ?")
@@ -622,7 +634,7 @@ async def sync_excel_edits(file_id: str, file: UploadFile = File(...)):
 
                 if invoice_col and str(row[invoice_col]).strip():
                     sql_updates.append("invoice_name = ?")
-                    params.append(str(row[invoice_col]).strip().upper()[:33])
+                    params.append(normalize_title(str(row[invoice_col]).strip(), liquor=liquor).upper()[:33])
 
                 if item_no_col and str(row[item_no_col]).strip():
                     sql_updates.append("item_number = ?")

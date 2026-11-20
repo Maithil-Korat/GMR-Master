@@ -12,7 +12,7 @@ import database
 import logger
 import gemini
 from attribute_schema import descriptions, load, names
-from normalize import normalize_attribute
+from normalize import is_liquor_product, normalize_attribute
 
 try:
     from google import genai
@@ -118,10 +118,21 @@ def client() -> Any:
     return gemini.build_client("Attribute generation")
 
 
-def process_item_attributes(value: dict[str, Any], category_names: list[str]) -> tuple[dict[str, str], dict[str, list[str]]]:
+def process_item_attributes(
+    value: dict[str, Any],
+    category_names: list[str],
+    product_type: str = "",
+) -> tuple[dict[str, str], dict[str, list[str]]]:
     raw_attributes = value.get("attributes") or {}
     raw_evidence = value.get("evidence") or {}
-    normalized = {name: normalize_attribute(name, raw_attributes.get(name, "NA")) for name in category_names}
+    normalized = {
+        name: normalize_attribute(
+            name,
+            raw_attributes.get(name, "NA"),
+            liquor=is_liquor_product(product_type),
+        )
+        for name in category_names
+    }
     evidence = {name: [str(item) for item in raw_evidence.get(name, [])] for name in category_names}
     return normalized, evidence
 
@@ -166,7 +177,7 @@ def direct_parallel_attributes(
         results = []
         for item in data.get("items", []):
             row_id = int(item["row_id"])
-            norm, ev = process_item_attributes(item, category_names)
+            norm, ev = process_item_attributes(item, category_names, category)
             res = {"row_id": str(row_id), "attributes": norm, "evidence": ev}
             if pass2:
                 res.update({
@@ -253,6 +264,10 @@ def batch(
 
         res_file = getattr(getattr(job, "dest", None), "file_name", None)
         content = service.files.download(file=res_file).decode("utf-8")
+        row_product_types = {
+            int(row["Sr. no."]): str(row.get("Product Type") or "")
+            for row in rows
+        }
 
         result: dict[int, dict[str, Any]] = {}
         for line in content.splitlines():
@@ -272,7 +287,7 @@ def batch(
                     payload = json.loads(text)
                     for item in payload.get("items", []):
                         row_id = int(item["row_id"])
-                        norm, ev = process_item_attributes(item, category_names)
+                        norm, ev = process_item_attributes(item, category_names, row_product_types[row_id])
                         res = {"row_id": str(row_id), "attributes": norm, "evidence": ev}
                         if pass2:
                             res.update({

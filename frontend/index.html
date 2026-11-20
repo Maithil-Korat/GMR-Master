@@ -128,6 +128,18 @@ main.wrap { max-width: 1780px; margin: 0 auto; padding: 20px 28px 48px; display:
 .step:hover:not(:disabled) { background: var(--primary-subtle); border-color: var(--primary); }
 .step.on { background: var(--primary); color: #fff; border-color: var(--primary); }
 .step.on small { color: rgba(255,255,255,0.8); }
+.step.done { border-color: var(--clean-border); background: var(--clean-bg); }
+.step.done::before { content: "✓ "; color: var(--clean); font-weight: 800; }
+.step.done small { color: var(--clean); }
+.step.error { border-color: var(--blocked-border); background: var(--blocked-bg); }
+.step.error::before { content: "! "; color: var(--blocked); font-weight: 800; }
+.step.error small { color: var(--blocked); }
+.step.running { border-color: #bfdbfe; background: var(--primary-subtle); }
+.step.running::before { content: "● "; color: var(--primary); }
+.step-status { display: block; margin-top: 3px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); }
+.step.done .step-status { color: var(--clean); }
+.step.error .step-status { color: var(--blocked); }
+.step.running .step-status { color: var(--primary); }
 
 .live { padding: 10px 16px; display: flex; gap: 14px; align-items: center; font-size: 12.5px; font-weight: 600; }
 .live.sticky-run { position: sticky; top: 64px; z-index: 20; box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
@@ -229,6 +241,49 @@ td.title { min-width: 300px; font-weight: 600; color: var(--text-main); }
 .up { max-width: 520px; margin: 16vh auto 0; text-align: center; }
 .drop { margin-top: 20px; border: 2px dashed var(--border-strong); border-radius: var(--radius-lg); padding: 48px 24px; background: var(--panel); transition: all 0.15s; }
 .drop.drag { border-color: var(--primary); background: var(--primary-subtle); }
+
+@media (max-width: 980px) {
+  header.navbar { align-items: flex-start; padding: 10px 16px; }
+  .actions { flex-wrap: wrap; justify-content: flex-end; }
+  main.wrap { padding: 16px 16px 36px; }
+  .steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: visible; }
+  .step { min-width: 0; }
+  .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .toolbar { align-items: stretch; }
+  input[type=search] { max-width: none; flex: 1 1 320px; }
+}
+
+@media (max-width: 640px) {
+  header.navbar { position: relative; flex-direction: column; }
+  .brand { width: 100%; }
+  .brand small { display: block; max-width: calc(100vw - 78px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .actions { width: 100%; justify-content: flex-start; }
+  .actions .btn { flex: 1 1 145px; justify-content: center; }
+  .actions label { width: 100%; }
+  main.wrap { padding: 10px 10px 24px; gap: 10px; }
+  .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .step { padding: 7px 8px; }
+  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .card { padding: 10px 12px; }
+  .card b { font-size: 20px; }
+  .live { align-items: flex-start; flex-wrap: wrap; }
+  .live .bar { flex-basis: 100%; order: 2; }
+  .bulk { align-items: stretch; }
+  .bulk input, .bulk select, .bulk .btn { flex: 1 1 100%; min-width: 0; width: 100%; }
+  .toolbar input[type=search] { flex-basis: 100%; }
+  .toolbar .mute { display: none; }
+  .tablebox { max-height: 58vh; }
+  table { min-width: 820px; }
+  .pager { align-items: stretch; }
+  .pager > div { width: 100%; justify-content: space-between; }
+  .scrim { justify-content: flex-end; }
+  .drawer { width: 100%; padding: 16px; }
+  .modal { max-height: calc(100vh - 32px); overflow-y: auto; padding: 16px; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .up { max-width: none; margin: 8vh 12px 0; }
+  .drop { padding: 32px 16px; }
+  .toasts { bottom: 10px; }
+}
 </style>
 </head>
 <body>
@@ -290,6 +345,22 @@ async function api(path, opts = {}) {
 }
 const getJSON = async (p, o) => (await api(p, o)).json();
 
+const stageStorageKey = fileId => `gmr_stage_status_${fileId}`;
+function readStageStates(fileId) {
+  try { return JSON.parse(localStorage.getItem(stageStorageKey(fileId))) || {}; }
+  catch { return {}; }
+}
+function writeStageStates(fileId, states) {
+  try { localStorage.setItem(stageStorageKey(fileId), JSON.stringify(states)); }
+  catch {}
+}
+function markStageComplete(fileId, stage) {
+  const states = readStageStates(fileId);
+  states[stage] = { status: "done", updatedAt: new Date().toISOString() };
+  writeStageStates(fileId, states);
+  window.dispatchEvent(new CustomEvent("gmr-stage-updated", { detail: { fileId, states } }));
+}
+
 function App() {
   const [file, setFile] = useState(() => {
     try { return JSON.parse(localStorage.getItem("gmr_file")); }
@@ -306,7 +377,7 @@ function App() {
 
   return html`
     ${file ? html`<${Workspace} key=${file.file_id} file=${file} onExit=${() => set(null)} onOpenColumns=${() => setColumnModalFile(file)} />` : html`<${Upload} onDone=${f => { set(f); setColumnModalFile(f); }} />`}
-    ${columnModalFile && html`<${ColumnSetupModal} file=${columnModalFile} onClose=${() => setColumnModalFile(null)} />`}
+    ${columnModalFile && html`<${ColumnSetupModal} file=${columnModalFile} onClose=${() => setColumnModalFile(null)} onSaved=${() => markStageComplete(columnModalFile.file_id, "FIELD_MAP")} />`}
   `;
 }
 
@@ -380,15 +451,16 @@ function Upload({ onDone }) {
   </div>`;
 }
 
-function ColumnSetupModal({ file, onClose }) {
+function ColumnSetupModal({ file, onClose, onSaved }) {
   const [mappings, setMappings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     getJSON(`/api/files/${file.file_id}/columns`)
       .then(d => { setMappings(d.mappings); setLoading(false); })
-      .catch(() => setLoading(false));
+      .catch(e => { setLoading(false); setError(e.message); });
   }, [file.file_id]);
 
   const togglePrimary = idx => {
@@ -396,12 +468,13 @@ function ColumnSetupModal({ file, onClose }) {
   };
 
   const handleSave = async () => {
-    setBusy(true);
+    setBusy(true); setError("");
     try {
       await api(`/api/files/${file.file_id}/columns`, { json: { mappings } });
+      onSaved();
       onClose();
     } catch (e) {
-      alert(e.message);
+      setError(e.message);
     } finally {
       setBusy(false);
     }
@@ -429,6 +502,7 @@ function ColumnSetupModal({ file, onClose }) {
       <button class="btn" onClick=${onClose}>Close</button>
       <button class="btn pri" disabled=${busy || loading} onClick=${handleSave}>${busy ? "Building Contexts..." : "Confirm & Build Contexts ✓"}</button>
     </div>
+    ${error && html`<p style="color:var(--blocked); font-size:12px; margin:0;" role="alert">${error}</p>`}
   </div></div>`;
 }
 
@@ -559,6 +633,7 @@ function ExportModal({ m, onClose, onGo }) {
 function Workspace({ file, onExit, onOpenColumns }) {
   const id = file.file_id;
   const [job, setJob] = useState({ status: "IDLE", active_stage: "", progress_percent: 0, progress_counter: "", message: "" });
+  const [stageStates, setStageStates] = useState(() => readStageStates(id));
   const [m, setM] = useState({ total: file.total_rows || 0, clean: 0, review_required: 0, blocked: 0, duplicates: 0, issue_clusters: {} });
   const [rows, setRows] = useState([]), [total, setTotal] = useState(0), [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1), [limit, setLimit] = useState(50);
@@ -597,6 +672,27 @@ function Workspace({ file, onExit, onOpenColumns }) {
     setToasts(t => [...t, { k, msg, kind }]);
     setTimeout(() => setToasts(t => t.filter(x => x.k !== k)), 4000);
   };
+  const updateStageStates = (states) => {
+    setStageStates(prev => {
+      const next = { ...prev, ...states };
+      writeStageStates(id, next);
+      return next;
+    });
+  };
+  useEffect(() => {
+    const handleStageUpdate = e => {
+      if (e.detail?.fileId === id) setStageStates(e.detail.states);
+    };
+    window.addEventListener("gmr-stage-updated", handleStageUpdate);
+    return () => window.removeEventListener("gmr-stage-updated", handleStageUpdate);
+  }, [id]);
+  const markStageRunning = stage => {
+    if (stage === "AUTO_PILOT") {
+      updateStageStates(Object.fromEntries(STAGES.map(([k]) => [k, { status: "running", updatedAt: new Date().toISOString() }])));
+    } else if (stage) {
+      updateStageStates({ [stage]: { status: "running", updatedAt: new Date().toISOString() } });
+    }
+  };
 
   const refreshStatus = useCallback(async () => {
     try {
@@ -604,9 +700,25 @@ function Workspace({ file, onExit, onOpenColumns }) {
       setM(d.metrics);
       setJob(d.job);
 
+      if (d.job.status === "RUNNING") {
+        markStageRunning(d.job.active_stage);
+      } else if (d.job.status === "COMPLETED") {
+        if (d.job.active_stage === "AUTO_PILOT") {
+          updateStageStates(Object.fromEntries(STAGES.map(([k]) => [k, { status: "done", updatedAt: d.job.updated_at || new Date().toISOString() }])));
+        } else if (d.job.active_stage) {
+          updateStageStates({ [d.job.active_stage]: { status: "done", updatedAt: d.job.updated_at || new Date().toISOString() } });
+        }
+      } else if (d.job.status === "ERROR") {
+        if (d.job.error_stage) {
+          updateStageStates({ [d.job.error_stage]: { status: "error", updatedAt: d.job.updated_at || new Date().toISOString(), message: d.job.error } });
+        }
+      }
+
       if (prevStatusRef.current === "RUNNING" && d.job.status !== "RUNNING") {
         reload();
         if (d.job.status === "COMPLETED") notify(d.job.message || "Stage completed.");
+        if (d.job.status === "ERROR") notify(d.job.error || d.job.message || "Stage failed.", "err");
+        if (d.job.status === "CANCELLED") notify("Stage job cancelled.", "err");
       }
       prevStatusRef.current = d.job.status;
     } catch {}
@@ -643,6 +755,7 @@ function Workspace({ file, onExit, onOpenColumns }) {
 
   const run = async (stage, rowIds = []) => {
     setJob(j => ({ ...j, status: "RUNNING", active_stage: stage, progress_percent: 5, message: "Starting..." }));
+    markStageRunning(stage);
     try {
       await api(`/api/files/${id}/stages/run`, {
         json: { stage, check_master: linkDupes, selected_row_ids: rowIds.map(S), operator_hint: hint }
@@ -785,9 +898,16 @@ function Workspace({ file, onExit, onOpenColumns }) {
   <main class="wrap">
     <section class="panel steps" aria-label="Pipeline stages">
       ${STAGES.map(([k, l], i) => html`
-        <button key=${k} class=${"step" + (running && job.active_stage === k ? " on" : "")} disabled=${running} onClick=${() => run(k)} title=${"Run: " + l}>
+        <button key=${k} class=${"step" +
+          (running && (job.active_stage === k || (job.active_stage === "AUTO_PILOT" && stageStates[k]?.status === "running")) ? " running on" : "") +
+          (stageStates[k]?.status === "done" ? " done" : "") +
+          (stageStates[k]?.status === "error" ? " error" : "")}
+          disabled=${running}
+          onClick=${() => run(k)}
+          title=${stageStates[k]?.status === "error" ? (stageStates[k].message || "Stage failed") : ("Run: " + l)}>
           <small>Stage 0${i + 1}</small>
           <b>${l}</b>
+          <span class="step-status">${stageStates[k]?.status === "done" ? "Completed" : stageStates[k]?.status === "error" ? "Failed" : stageStates[k]?.status === "running" ? "In progress" : "Not started"}</span>
         </button>
       `)}
     </section>

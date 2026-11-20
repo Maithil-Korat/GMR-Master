@@ -11,6 +11,7 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 import attribute_schema
 import database
 import logger
+from normalize import is_liquor_product, normalize_attribute, normalize_units
 
 PURPLE_FILL = PatternFill(start_color="E1D5E7", end_color="E1D5E7", fill_type="solid")
 FLAG_FILL = PatternFill(start_color="FFF2CC", end_color="FFF2CC", fill_type="solid")
@@ -43,6 +44,14 @@ def export_catalog(
         content_p2 = r.get("Content Pass 2") or {}
         attrs_p2 = r.get("Attributes Pass 2") or r.get("Attributes Pass 1") or {}
         pt = str(r.get("Product Type") or "")
+        liquor = is_liquor_product(pt)
+        if liquor:
+            content_p2 = {
+                name: normalize_units(value, liquor=True)
+                if isinstance(value, str)
+                else value
+                for name, value in content_p2.items()
+            }
 
         # 1. Always start with Sr. no. as Column 1
         item_row: dict[str, Any] = {
@@ -60,7 +69,7 @@ def export_catalog(
         attr_kv_list: list[str] = []
 
         for name in canonical_attr_names:
-            val = str(attrs_p2.get(name, "NA") or "NA").strip()
+            val = normalize_attribute(name, attrs_p2.get(name, "NA"), liquor=liquor)
             canonical_attrs_dict[name] = val
             attr_kv_list.append(f"{name}: {val}")
 

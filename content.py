@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field
 import database
 import logger
 import gemini
-from normalize import normalize_invoice, normalize_text
+from normalize import is_liquor_product, normalize_invoice, normalize_text, normalize_units
 
 try:
     from google import genai
@@ -171,14 +171,20 @@ def sanitize_hsn(value: object, product_type: str = "") -> str:
 
 def normalize_content(value: dict[str, Any], product_type: str = "") -> dict[str, Any]:
     content = dict(value)
+    liquor = is_liquor_product(product_type)
     for name in ("brand_name", "parent_company", "product_size", "marketplace_title", "short_description", "long_description"):
         content[name] = normalize_text(content.get(name, "")) or "NA"
+        if liquor:
+            content[name] = normalize_units(content[name], liquor=True)
 
     content["country_of_origin"] = normalize_text(content.get("country_of_origin", "")) or "Imported"
     if content["country_of_origin"].upper() in {"NA", "N/A", "UNKNOWN", "UNRESOLVED", ""}:
         content["country_of_origin"] = "Imported"
 
-    content["invoice_name"] = normalize_invoice(content.get("invoice_name") or content.get("marketplace_title"))
+    content["invoice_name"] = normalize_invoice(
+        content.get("invoice_name") or content.get("marketplace_title"),
+        liquor=liquor,
+    )
     content["hsn_code"] = sanitize_hsn(content.get("hsn_code"), product_type)
 
     raw_ev = content.get("evidence")
@@ -192,8 +198,8 @@ def normalize_content(value: dict[str, Any], product_type: str = "") -> dict[str
     return ContentFields.model_validate(content).model_dump()
 
 
-def unique_invoice(value: str, used: set[str], row_id: str) -> tuple[str, bool]:
-    base = normalize_invoice(value) or normalize_invoice(f"ITEM ROW {row_id}")
+def unique_invoice(value: str, used: set[str], row_id: str, liquor: bool = False) -> tuple[str, bool]:
+    base = normalize_invoice(value, liquor=liquor) or normalize_invoice(f"ITEM ROW {row_id}", liquor=liquor)
     candidate = base
     if candidate not in used:
         used.add(candidate)
@@ -468,7 +474,15 @@ def run(
 
     for decision in audits:
         c = decision["content"]
-        invoice, _ = unique_invoice(c["invoice_name"], used, str(decision["row_id"]))
+        invoice, _ = unique_invoice(
+            c["invoice_name"],
+            used,
+            str(decision["row_id"]),
+            liquor=is_liquor_product(next(
+                (r.get("Product Type") for r in audited_rows if str(r["Sr. no."]) == str(decision["row_id"])),
+                "",
+            )),
+        )
         c["invoice_name"] = invoice
 
         bkey = brand_key(c["brand_name"])

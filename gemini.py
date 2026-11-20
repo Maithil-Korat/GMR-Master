@@ -36,7 +36,13 @@ def build_client(context: str = "Gemini API") -> Any:
     key = require_api_key(context)
     if genai is None:
         raise RuntimeError("google-genai is not installed")
-    return genai.Client(api_key=key, http_options=genai_types.HttpOptions(timeout=REQUEST_TIMEOUT_MS))
+    return genai.Client(
+        api_key=key,
+        http_options=genai_types.HttpOptions(
+            api_version="v1beta",
+            timeout=REQUEST_TIMEOUT_MS,
+        ),
+    )
 
 
 def preflight(context: str = "pipeline") -> None:
